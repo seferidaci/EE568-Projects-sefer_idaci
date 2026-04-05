@@ -1,0 +1,619 @@
+%% EE568 HW1 -- Variable Reluctance Machine Report
+%% Compile with: pdflatex main.tex  (run twice for TOC/refs)
+%% Requires only standard packages (no siunitx, no booktabs)
+
+\documentclass[12pt,a4paper]{article}
+
+%% ── Packages (all standard / widely available) ─────────────────────────────
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{textcomp}   % \textdegree
+
+%% Fix headheight warning
+\setlength{\headheight}{15pt}
+
+%% ── Convenience macros (replaces siunitx) ───────────────────────────────────
+\newcommand{\unit}[1]{\,\mathrm{#1}}          % \unit{mm} in math
+\newcommand{\tunit}[1]{~\mathrm{#1}}          % \tunit{mm} in text
+\newcommand{\SIv}[2]{$#1\unit{#2}$}           % \SIv{42.41}{mH}  (value+unit inline)
+
+%% ── Listings style (MATLAB) ─────────────────────────────────────────────────
+\lstdefinestyle{matlab}{
+  language=Matlab,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{green!60!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+  tabsize=4,
+  showstringspaces=false,
+  captionpos=b
+}
+
+%% ── Header / Footer ─────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{EE568 -- Project 1}
+\lhead{Variable Reluctance Machine}
+\rfoot{\thepage}
+
+%% ── Hyperref setup ──────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!70!black,
+  citecolor=green!50!black,
+  urlcolor=blue!70!black
+}
+
+%% ════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+%% ── Title Page ──────────────────────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+  {\Large Middle East Technical University \par}
+  \vspace{0.4cm}
+  {\large Department of Electrical and Electronics Engineering \par}
+  \vspace{2cm}
+  \rule{\linewidth}{0.5pt}\\[0.4cm]
+  {\LARGE \textbf{EE568 -- Project 1} \par}
+  \vspace{0.3cm}
+  {\large \textbf{Torque in a Variable Reluctance Machine} \par}
+  \rule{\linewidth}{0.5pt}\\[1.5cm]
+
+  \begin{tabular}{ll}
+    \textbf{Course:}   & EE568 -- Design of Electrical Machines \\[4pt]
+    \textbf{Deadline:} & 20 April 2026, 23:59                   \\
+  \end{tabular}
+
+  \vfill
+  {\small \today}
+\end{titlepage}
+
+%% ── Table of Contents ───────────────────────────────────────────────────────
+\tableofcontents
+\newpage
+
+%% ════════════════════════════════════════════════════════════════════════════
+\section{Introduction}
+%% ════════════════════════════════════════════════════════════════════════════
+
+This report analyses a single-phase variable reluctance machine (VRM)
+analytically and through finite element analysis (FEA).
+The machine consists of a rectangular laminated-steel stator core and a
+D-shaped rotor. As the rotor rotates, the magnetic circuit reluctance
+changes, producing a net electromagnetic torque.
+
+The objectives of this project are:
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item Derive analytically the inductance and torque as functions of
+        rotor angle under constant DC excitation.
+  \item Model the machine in 2D FEA with linear material properties and
+        compare with the analytical results.
+  \item Repeat the 2D FEA with non-linear (saturating) material properties.
+  \item Propose a control method to achieve continuous unidirectional
+        rotation.
+\end{enumerate}
+
+%% ════════════════════════════════════════════════════════════════════════════
+\section{Q1 -- Analytical Modelling}
+%% ════════════════════════════════════════════════════════════════════════════
+
+\subsection{Machine Description and Given Parameters}
+
+The machine geometry is shown in Figures~\ref{fig:core3d}
+and~\ref{fig:dimensions}.
+The stator is a closed rectangular frame with a coil wound around the
+left leg.  The D-shaped rotor sits inside a circular opening on the
+right side, creating two variable air gaps.
+The given parameters are listed in Table~\ref{tab:params}.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.46\textwidth}
+    \includegraphics[width=\linewidth]{../core.jpeg}
+    \caption{3-D view of the stator frame and rotor.}
+    \label{fig:core3d}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.50\textwidth}
+    \includegraphics[width=\linewidth]{../dimensions.jpeg}
+    \caption{2-D dimensioned drawing (all dimensions in mm).}
+    \label{fig:dimensions}
+  \end{subfigure}
+  \caption{Variable reluctance machine geometry.}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{Given machine parameters.}
+  \label{tab:params}
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{|l|c|r|l|}
+    \hline
+    \textbf{Parameter}         & \textbf{Symbol} & \textbf{Value} & \textbf{Unit} \\
+    \hline
+    Number of turns            & $N$             & 300            & --            \\
+    DC coil current            & $I$             & 2.5            & A             \\
+    Air-gap clearance (each)   & $g$             & 0.5            & mm            \\
+    Core depth (into page)     & $d$             & 25             & mm            \\
+    Core / yoke width          & $w_c$           & 15             & mm            \\
+    Stator outer width         & $W$             & 60             & mm            \\
+    Stator inner window height & $h_w$           & 40             & mm            \\
+    Stator inner window width  & $w_w$           & 30             & mm            \\
+    Rotor outer radius         & $R_r$           & 12.5           & mm            \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{Assumptions}
+
+The following simplifying assumptions are made for Part Q1:
+
+\begin{enumerate}[label=\alph*)]
+  \item \textbf{Infinite core permeability} ($\mu_r \to \infty$): core
+        reluctance is negligible; only the air-gap reluctance matters.
+  \item \textbf{No fringing flux}: the effective flux cross-section equals
+        the geometric core cross-section at every rotor position.
+  \item \textbf{Uniform flux distribution}: flux density is uniform
+        across the core cross-section.
+  \item \textbf{Sinusoidal inductance variation}: the inductance varies
+        sinusoidally with twice the mechanical rotor angle, a standard
+        first-order approximation for a 2-pole machine.
+  \item \textbf{Lossless magnetic circuit}: eddy-current and hysteresis
+        effects are neglected.
+\end{enumerate}
+
+\subsection{Core Geometry Calculations}
+
+\subsubsection{Core Cross-Sectional Area}
+
+The core cross-section is rectangular with width
+$w_c = 15\unit{mm}$ and depth $d = 25\unit{mm}$:
+
+\begin{equation}
+  A_{\mathrm{core}} = w_c \times d
+    = 15 \times 25 = 375\unit{mm^2}
+    = 375 \times 10^{-6}\unit{m^2}
+  \label{eq:Acore}
+\end{equation}
+
+\subsubsection{Mean Core Path Length}
+
+The mean magnetic path length is computed along the centre-line of the
+stator yokes and legs:
+
+\begin{align}
+  \ell_{\mathrm{core}}
+    &= 2\,(w_w + w_c) + 2\,(h_w + w_c) \notag \\
+    &= 2\,(30 + 15) + 2\,(40 + 15) \notag \\
+    &= 90 + 110 = 200\unit{mm} = 0.2\unit{m}
+  \label{eq:lcore}
+\end{align}
+
+Under the infinite-permeability assumption, core reluctance is zero
+and $\ell_{\mathrm{core}}$ does not enter the inductance calculation.
+It is used in the non-linear extension of Section~\ref{sec:improve}.
+
+\subsubsection{Air-Gap Lengths}
+
+The magnetic flux crosses \textbf{two air gaps in series} (from stator
+into rotor and back). The total effective gap length varies between a
+minimum (aligned) and a maximum (unaligned) value.
+
+\paragraph{Aligned position ($\theta = 0^{\circ}$).}
+The curved arc of the D-rotor faces both stator pole tips.
+Each gap equals the design clearance:
+\begin{equation}
+  \ell_{g,\min} = 2g = 2 \times 0.5 = 1\unit{mm}
+  \label{eq:lgmin}
+\end{equation}
+
+\paragraph{Unaligned position ($\theta = 90^{\circ}$).}
+The flat face of the D-rotor faces the stator pole tips.
+Each effective gap increases to $2.5\unit{mm}$:
+\begin{equation}
+  \ell_{g,\max} = 2 \times 2.5 = 5\unit{mm}
+  \label{eq:lgmax}
+\end{equation}
+
+\subsection{Reluctance and Inductance at Extreme Positions}
+\label{sec:LmaxLmin}
+
+With infinite core permeability the circuit reluctance equals the
+air-gap reluctance alone:
+
+\begin{equation}
+  \mathcal{R} = \frac{\ell_g}{\mu_0 \, A_{\mathrm{core}}}
+  \label{eq:reluctance}
+\end{equation}
+
+and the self-inductance is:
+
+\begin{equation}
+  L = \frac{N^2}{\mathcal{R}}
+    = \frac{N^2 \,\mu_0 \,A_{\mathrm{core}}}{\ell_g}
+  \label{eq:inductance}
+\end{equation}
+
+\subsubsection{Maximum Inductance -- Aligned ($\theta = 0^{\circ}$)}
+
+\begin{align}
+  \mathcal{R}_{\min}
+    &= \frac{\ell_{g,\min}}{\mu_0\, A_{\mathrm{core}}}
+     = \frac{1 \times 10^{-3}}{4\pi \times 10^{-7} \times 375 \times 10^{-6}}
+     = 2.122 \times 10^{6}\unit{A/Wb}
+  \label{eq:Rmin} \\[6pt]
+  L_{\max}
+    &= \frac{N^2}{\mathcal{R}_{\min}}
+     = \frac{300^2}{2.122 \times 10^{6}}
+     = 42.41\unit{mH}
+  \label{eq:Lmax}
+\end{align}
+
+\subsubsection{Minimum Inductance -- Unaligned ($\theta = 90^{\circ}$)}
+
+\begin{align}
+  \mathcal{R}_{\max}
+    &= \frac{\ell_{g,\max}}{\mu_0\, A_{\mathrm{core}}}
+     = \frac{5 \times 10^{-3}}{4\pi \times 10^{-7} \times 375 \times 10^{-6}}
+     = 10.610 \times 10^{6}\unit{A/Wb}
+  \label{eq:Rmax} \\[6pt]
+  L_{\min}
+    &= \frac{N^2}{\mathcal{R}_{\max}}
+     = \frac{300^2}{10.610 \times 10^{6}}
+     = 8.48\unit{mH}
+  \label{eq:Lmin}
+\end{align}
+
+The ratio $\mathcal{R}_{\max}/\mathcal{R}_{\min}
+= \ell_{g,\max}/\ell_{g,\min} = 5$, so
+$L_{\min}/L_{\max} = 1/5$.
+Results are summarised in Table~\ref{tab:LR}.
+
+\begin{table}[H]
+  \centering
+  \caption{Reluctance and inductance at extreme rotor positions.}
+  \label{tab:LR}
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{|l|r|r|r|}
+    \hline
+    \textbf{Position}            & $\ell_g$ (mm) & $\mathcal{R}$ (MA/Wb) & $L$ (mH) \\
+    \hline
+    Aligned ($\theta=0^{\circ}$)   & 1.0           & 2.122                 & 42.41    \\
+    Unaligned ($\theta=90^{\circ}$) & 5.0           & 10.610                & 8.48     \\
+    \hline
+    Average                      & --            & --                    & 25.45    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{Inductance Variation as a Function of Rotor Angle}
+\label{sec:Ltheta}
+
+Under the sinusoidal approximation, the inductance at an arbitrary
+mechanical angle $\theta$ is:
+
+\begin{equation}
+  \boxed{L(\theta) = \frac{L_{\max}+L_{\min}}{2}
+    + \frac{L_{\max}-L_{\min}}{2}\cos(2\theta)}
+  \label{eq:Ltheta}
+\end{equation}
+
+This satisfies the boundary conditions:
+$L(0^{\circ}) = L_{\max} = 42.41\unit{mH}$ and
+$L(90^{\circ}) = L_{\min} = 8.48\unit{mH}$.
+The factor $2\theta$ reflects the two-pole symmetry: inductance
+completes one full cycle every $180^{\circ}$ of mechanical rotation.
+
+The computed inductance variation is plotted in the top panel of
+Figure~\ref{fig:LT_plots}.
+
+\subsection{Torque Derivation}
+\label{sec:torque}
+
+For a lossless system with constant current excitation, the
+electromagnetic torque follows from the co-energy derivative
+(which equals the field energy derivative for a linear system):
+
+\begin{equation}
+  T(\theta) = \frac{1}{2}\,i^2\,\frac{dL(\theta)}{d\theta}
+  \label{eq:Tcoenergy}
+\end{equation}
+
+Differentiating Equation~(\ref{eq:Ltheta}):
+
+\begin{equation}
+  \frac{dL}{d\theta} = -(L_{\max}-L_{\min})\sin(2\theta)
+  \label{eq:dLdtheta}
+\end{equation}
+
+Substituting into Equation~(\ref{eq:Tcoenergy}):
+
+\begin{equation}
+  \boxed{T(\theta) = -\frac{i^2}{2}\,(L_{\max}-L_{\min})\,\sin(2\theta)}
+  \label{eq:Ttheta}
+\end{equation}
+
+With constant $i = I = 2.5\unit{A}$, the peak torque amplitude is:
+
+\begin{align}
+  T_{\mathrm{peak}}
+    &= \frac{I^2}{2}\,(L_{\max}-L_{\min}) \notag \\
+    &= \frac{(2.5)^2}{2} \times (42.41 - 8.48) \times 10^{-3} \notag \\
+    &= \frac{6.25}{2} \times 33.93 \times 10^{-3}
+     = 106.0\unit{mN \cdot m}
+  \label{eq:Tpeak}
+\end{align}
+
+The average torque under constant DC excitation is zero because
+positive and negative half-cycles cancel over a complete revolution.
+Continuous rotation requires switched excitation
+(Section~\ref{sec:control}).
+
+The torque profile is plotted in the bottom panel of
+Figure~\ref{fig:LT_plots}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{../analytical_LT_plots.png}
+  \caption{Analytically derived inductance (top) and torque (bottom)
+           as functions of rotor mechanical angle under constant DC
+           excitation ($I = 2.5\unit{A}$, $N = 300$).
+           The inductance oscillates between
+           $L_{\min} = 8.48\unit{mH}$ and $L_{\max} = 42.41\unit{mH}$;
+           the torque oscillates between
+           $\pm 106\unit{mN \cdot m}$ with zero mean.}
+  \label{fig:LT_plots}
+\end{figure}
+
+\subsection{Suggestions to Improve the Analytical Model}
+\label{sec:improve}
+
+\subsubsection{Finite Core Permeability (Linear)}
+
+When the core permeability is finite ($\mu_r < \infty$), the core
+reluctance must be added in series with the air-gap reluctance:
+
+\begin{equation}
+  \mathcal{R}_{\mathrm{total}}
+    = \underbrace{\frac{\ell_g}{\mu_0 A_c}}_{\text{air gap}}
+    + \underbrace{\frac{\ell_{\mathrm{core}}}{\mu_0 \mu_r A_c}}_{\text{core}}
+  \label{eq:Rtotal}
+\end{equation}
+
+For a typical silicon-steel grade ($\mu_r \approx 5000$) this
+reduces $L_{\max}$ by a few percent and modifies the
+$L_{\max}/L_{\min}$ ratio.
+
+\subsubsection{Non-Linear (Saturating) Core}
+
+Real electrical steels have a non-linear $B$--$H$ characteristic.
+At high flux densities the core saturates and $\mu_r$ falls sharply.
+Inductance then depends on both $\theta$ and $i$:
+$L = L(\theta, i)$.  Torque must be evaluated from the general
+co-energy integral:
+
+\begin{equation}
+  T = \left.\frac{\partial W'(\theta,i)}{\partial\theta}\right|_{i=\mathrm{const}},
+  \qquad
+  W' = \int_0^{i} \lambda(\theta, i')\,di'
+\end{equation}
+
+where $\lambda$ is the flux linkage. Both $L_{\max}$ and $L_{\min}$
+are reduced relative to the infinite-permeability case, and the torque
+profile deviates from a pure sinusoid.
+
+\subsubsection{Fringing Flux Correction}
+
+Fringing flux at the air-gap edges effectively increases the
+cross-section seen by the flux.  A common empirical correction adds one
+gap length to each linear dimension of the pole face:
+
+\begin{equation}
+  A_{c,\mathrm{eff}} \approx (w_c + \ell_g)\,(d + \ell_g)
+  \label{eq:fringing}
+\end{equation}
+
+Because $\ell_g$ differs between aligned and unaligned positions,
+the fringing correction modifies the $L_{\max}/L_{\min}$ ratio.
+A 2-D or 3-D FEA simulation captures this effect automatically.
+
+\subsubsection{Position-Dependent Pole Overlap}
+
+The sinusoidal approximation is a first-order model.  A more accurate
+description accounts for the actual change in overlapping pole arc
+area with angle, yielding a piece-wise linear or trapezoidal inductance
+profile.  This can be computed analytically by integrating the air-gap
+permeance over the overlapping area as a function of $\theta$.
+
+%% ════════════════════════════════════════════════════════════════════════════
+\section{Q2 -- FEA Modelling (2D, Linear Materials)}
+%% ════════════════════════════════════════════════════════════════════════════
+
+\textit{The 2D FEA simulation with linear material properties is performed
+in FEMM.  Results will be presented in this section.}
+
+\subsection{Model Setup}
+
+\begin{itemize}
+  \item Software: FEMM 4.2 (2D magneto-static solver).
+  \item Core material: \textit{[Material name -- e.g.\ M-19 silicon steel,
+        linear $\mu_r$ = \ldots]}.
+  \item Coil: modelled as a solid conductor region with equivalent
+        current density $J = NI/A_{\mathrm{coil}}$.
+  \item Mesh: \textit{[mesh size used]}.
+  \item Positions simulated: $0^{\circ}$, $45^{\circ}$, $90^{\circ}$.
+\end{itemize}
+
+\subsection{Flux Density Vector Plots}
+
+\textit{[Insert FEMM flux-density vector plots for $\theta = 0^{\circ}$,
+$45^{\circ}$, $90^{\circ}$ here.]}
+
+\subsection{Inductance and Stored Energy}
+
+\textit{[Insert table of inductance and stored energy at $\theta = 0^{\circ}$,
+$45^{\circ}$, $90^{\circ}$ from FEMM.]}
+
+\subsection{Torque vs.\ Rotor Angle -- Comparison with Analytical Model}
+
+\textit{[Insert torque vs.\ angle plot comparing FEA results (at least 10
+positions) with the analytical curve from Equation~(\ref{eq:Ttheta}).]}
+
+%% ════════════════════════════════════════════════════════════════════════════
+\section{Q3 -- FEA Modelling (2D, Non-Linear Materials)}
+%% ════════════════════════════════════════════════════════════════════════════
+
+\textit{This section repeats the FEA of Q2 using a non-linear (saturating)
+$B$--$H$ curve for the core material.}
+
+\subsection{Model Setup and Material Properties}
+
+\textit{[Describe the non-linear $B$--$H$ curve used.  Include a plot of the
+characteristic in the Appendix.]}
+
+\subsection{Flux Density Vector Plots}
+
+\textit{[Insert flux-density vector plots for three positions.]}
+
+\subsection{Inductance and Stored Energy}
+
+\textit{[Insert results table.]}
+
+\subsection{Torque vs.\ Rotor Angle}
+
+\textit{[Insert torque vs.\ angle plot.]}
+
+\subsection{Comparison: Linear vs.\ Non-Linear and Analytical vs.\ FEA}
+
+\textit{[Discuss saturation and fringing effects.  Compare $L_{\max}$,
+$L_{\min}$ and peak torque across all three models and comment on the
+validity of the sinusoidal approximation.]}
+
+%% ════════════════════════════════════════════════════════════════════════════
+\section{Q4 -- Control Method for Continuous Rotation}
+\label{sec:control}
+%% ════════════════════════════════════════════════════════════════════════════
+
+\subsection{Problem Statement}
+
+Under constant DC excitation the torque given by
+Equation~(\ref{eq:Ttheta}) averages to zero over one full revolution.
+To obtain net unidirectional rotation the coil current must be switched
+in synchrony with the rotor position.
+
+\subsection{Switched DC Excitation Strategy}
+
+From Equation~(\ref{eq:Ttheta}), torque is positive
+(rotation in the direction of increasing $\theta$) when:
+
+\begin{equation}
+  \sin(2\theta) < 0
+  \quad\Longrightarrow\quad
+  \theta \in (90^{\circ},\,180^{\circ})
+  \;\cup\;
+  (270^{\circ},\,360^{\circ})
+\end{equation}
+
+The coil is therefore energised with $I = 2.5\unit{A}$ only when the
+rotor moves from the \textbf{unaligned toward the aligned position}, and
+de-energised otherwise.
+
+\subsection{Average Torque with Switched Excitation}
+
+With ideal on/off switching (current on at $\theta = 90^{\circ}$,
+off at $\theta = 180^{\circ}$, repeated each half-cycle), the
+average positive torque is:
+
+\begin{align}
+  T_{\mathrm{avg}}
+    &= \frac{1}{\pi}\int_{90^{\circ}}^{180^{\circ}}
+       \frac{I^2}{2}\,(L_{\max}-L_{\min})\,
+       \bigl[-\sin(2\theta)\bigr]\,d\theta \notag \\[4pt]
+    &= \frac{T_{\mathrm{peak}}}{\pi}
+       \left[\frac{\cos(2\theta)}{2}\right]_{90^{\circ}}^{180^{\circ}} \notag \\[4pt]
+    &= \frac{T_{\mathrm{peak}}}{\pi}
+       \left(\frac{1}{2} - \left(-\frac{1}{2}\right)\right)
+     = \frac{T_{\mathrm{peak}}}{\pi}
+     \approx \frac{106.0}{\pi}
+     \approx 33.8\unit{mN \cdot m}
+  \label{eq:Tavg}
+\end{align}
+
+This is approximately $1/\pi \approx 31.8\%$ of the peak torque.
+
+\subsection{Practical Implementation}
+
+In practice the switching instants must account for:
+
+\begin{itemize}
+  \item \textbf{Turn-on advance angle}: current cannot rise
+        instantaneously; the coil must be energised slightly before
+        $\theta = 90^{\circ}$ to allow current to build up.
+  \item \textbf{Turn-off advance angle}: the coil must be switched off
+        before $\theta = 180^{\circ}$ (aligned) to avoid braking torque
+        during the current tail-off.
+  \item \textbf{Position sensing}: a Hall-effect sensor or incremental
+        encoder detects rotor position for synchronised switching.
+  \item \textbf{Current regulation}: a PWM chopper maintains constant
+        current during the on-interval, keeping the torque profile close
+        to the ideal sinusoidal shape derived analytically.
+\end{itemize}
+
+%% ════════════════════════════════════════════════════════════════════════════
+\section{Conclusion}
+%% ════════════════════════════════════════════════════════════════════════════
+
+An analytical model of a single-phase variable reluctance machine was
+developed assuming infinite core permeability.
+The self-inductance varies sinusoidally between
+$L_{\min} = 8.48\unit{mH}$ (unaligned) and
+$L_{\max} = 42.41\unit{mH}$ (aligned).
+Under constant DC excitation the torque oscillates at twice the
+mechanical frequency with a peak of $106\unit{mN \cdot m}$ and zero mean.
+Continuous unidirectional rotation is achieved by energising the coil
+only during the unaligned-to-aligned transition, yielding an average
+torque of approximately $33.8\unit{mN \cdot m}$.
+
+\textit{[FEA comparison and discussion to be completed after simulations.]}
+
+%% ════════════════════════════════════════════════════════════════════════════
+\appendix
+\section{MATLAB Source Code}
+%% ════════════════════════════════════════════════════════════════════════════
+
+The following MATLAB script generates the analytical inductance and torque
+plots. It is also available in the project GitHub repository.
+
+\lstinputlisting[style=matlab,
+  caption={Analytical model -- inductance and torque
+           (\texttt{analytical\_model.m}).},
+  label={lst:matlab}]{../analytical_model.m}
+
+%% ════════════════════════════════════════════════════════════════════════════
+\section{Material Properties}
+%% ════════════════════════════════════════════════════════════════════════════
+
+\textit{[Insert $B$--$H$ curve data and properties for the electrical steel
+lamination selected in Q2/Q3.]}
+
+%% ════════════════════════════════════════════════════════════════════════════
+\end{document}

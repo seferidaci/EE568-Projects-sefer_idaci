@@ -1,0 +1,39 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {section}{\numberline {2}Q1 -- Analytical Modelling}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Machine Description and Given Parameters}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Assumptions}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Core Geometry Calculations}{3}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Core Cross-Sectional Area}{3}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Mean Core Path Length}{3}{subsubsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.3}Air-Gap Lengths}{4}{subsubsection.2.3.3}%
+\contentsline {paragraph}{Aligned position ($\theta = 0^{\circ }$).}{4}{section*.4}%
+\contentsline {paragraph}{Unaligned position ($\theta = 90^{\circ }$).}{4}{section*.5}%
+\contentsline {subsection}{\numberline {2.4}Reluctance and Inductance at Extreme Positions}{4}{subsection.2.4}%
+\contentsline {subsubsection}{\numberline {2.4.1}Maximum Inductance -- Aligned ($\theta = 0^{\circ }$)}{4}{subsubsection.2.4.1}%
+\contentsline {subsubsection}{\numberline {2.4.2}Minimum Inductance -- Unaligned ($\theta = 90^{\circ }$)}{4}{subsubsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.5}Inductance Variation as a Function of Rotor Angle}{5}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Torque Derivation}{5}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Suggestions to Improve the Analytical Model}{6}{subsection.2.7}%
+\contentsline {subsubsection}{\numberline {2.7.1}Finite Core Permeability (Linear)}{6}{subsubsection.2.7.1}%
+\contentsline {subsubsection}{\numberline {2.7.2}Non-Linear (Saturating) Core}{7}{subsubsection.2.7.2}%
+\contentsline {subsubsection}{\numberline {2.7.3}Fringing Flux Correction}{7}{subsubsection.2.7.3}%
+\contentsline {subsubsection}{\numberline {2.7.4}Position-Dependent Pole Overlap}{7}{subsubsection.2.7.4}%
+\contentsline {section}{\numberline {3}Q2 -- FEA Modelling (2D, Linear Materials)}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Model Setup}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Flux Density Vector Plots}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Inductance and Stored Energy}{8}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Torque vs.\ Rotor Angle -- Comparison with Analytical Model}{8}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Q3 -- FEA Modelling (2D, Non-Linear Materials)}{8}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Model Setup and Material Properties}{8}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Flux Density Vector Plots}{8}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Inductance and Stored Energy}{8}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Torque vs.\ Rotor Angle}{8}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Comparison: Linear vs.\ Non-Linear and Analytical vs.\ FEA}{8}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Q4 -- Control Method for Continuous Rotation}{8}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Problem Statement}{8}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Switched DC Excitation Strategy}{9}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Average Torque with Switched Excitation}{9}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Practical Implementation}{9}{subsection.5.4}%
+\contentsline {section}{\numberline {6}Conclusion}{9}{section.6}%
+\contentsline {section}{\numberline {A}MATLAB Source Code}{10}{appendix.A}%
+\contentsline {section}{\numberline {B}Material Properties}{13}{appendix.B}%
