@@ -319,48 +319,169 @@ The main limitations of the model above and how to address them:
 %% ============================================================
 \section{Q2 -- FEA Modelling (Linear Materials)}
 
-\textit{The 2D FEA simulation with linear material properties is
-performed in FEMM.  Results will be added to this section.}
-
 \subsection{Model Setup}
+
+The machine was modelled in ANSYS Maxwell 2D (Student Edition 2025~R2)
+using a Magnetostatic solver.  The stator was drawn as a
+$60\times70\unit{mm}$ rectangle with the $30\times40\unit{mm}$ window
+and $13\unit{mm}$ bore subtracted.  The D-shaped rotor (pole radius
+$12.5\unit{mm}$, notch radius $12\unit{mm}$) was placed at the bore
+centre.  Two $10\times30\unit{mm}$ coil cross-sections were added on the
+left leg.
+
 \begin{itemize}
-  \item Software: FEMM 4.2 (2D magneto-static).
-  \item Core: \textit{[material, linear $\mu_r$ = \ldots]}.
-  \item Positions: $0^{\circ}$, $45^{\circ}$, $90^{\circ}$.
+  \item \textbf{Excitation:} Winding of 300~turns, $I = 2.5\unit{A}$ DC.
+        Coil terminals added with opposite polarities.
+  \item \textbf{Boundary:} Balloon condition on a large surrounding region.
+  \item \textbf{Mesh:} $0.25\unit{mm}$ maximum element in the air gap;
+        $1\unit{mm}$ on the core.  15 adaptive passes, $0.5\%$ energy
+        error criterion.
+  \item \textbf{Material:} Linear iron with constant relative permeability
+        $\mu_r = 4000$.
+  \item \textbf{Sweep:} Rotor angle from $0^{\circ}$ to $360^{\circ}$ in
+        $5^{\circ}$ steps; inductance and torque recorded at each step.
 \end{itemize}
 
 \subsection{Flux Density Plots}
-\textit{[Insert flux-density vector plots for three positions.]}
+
+\textit{[Insert Maxwell flux-density vector plots exported at
+$\theta = 0^{\circ}$, $45^{\circ}$, and $90^{\circ}$.]}
 
 \subsection{Inductance and Stored Energy}
-\textit{[Insert results table for $\theta = 0^{\circ}$, $45^{\circ}$,
-$90^{\circ}$.]}
+
+Inductance was extracted from the Matrix parameter on Winding1.
+Stored magnetic energy is $W = \tfrac{1}{2}LI^{2}$, which is exact for
+a linear material.
+
+\begin{table}[H]
+  \centering
+  \caption{FEA (linear iron, $\mu_r = 4000$) results at three rotor positions.}
+  \label{tab:fea_q2}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{|l|r|r|r|}
+    \hline
+    \textbf{Position} & $L$ (mH) & $W$ (mJ) & $T$ (mN$\cdot$m) \\
+    \hline
+    $\theta = 0^{\circ}$  (aligned)   & 53.14 & 166.1 & $\approx 0$ \\
+    $\theta = 45^{\circ}$             & 33.79 & 105.6 & $-104.9$    \\
+    $\theta = 90^{\circ}$ (unaligned) & 17.07 &  53.3 & $\approx 0$ \\
+    \hline
+  \end{tabular}
+\end{table}
 
 \subsection{Torque vs.\ Angle -- Comparison with Analytical Model}
-\textit{[Insert torque vs.\ angle plot comparing FEA ($\geq 10$
-positions) with Equation~(\ref{eq:Ttheta}).]}
+
+Figure~\ref{fig:fea_comparison} compares the linear FEA curves
+($5^{\circ}$ step parametric sweep, $0^{\circ}$--$360^{\circ}$,
+subsampled to $10^{\circ}$ steps for clarity) with the sinusoidal
+analytical model from Equation~(\ref{eq:Ttheta}).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{../fea_comparison.png}
+  \caption{Inductance (top) and torque (bottom) vs.\ rotor angle:
+           analytical model (dashed) vs.\ linear FEA with iron
+           ($\mu_r = 4000$, markers).}
+  \label{fig:fea_comparison}
+\end{figure}
+
+\subsection{Discussion}
+
+Table~\ref{tab:comparison} compares the analytical and linear FEA results.
+
+\begin{table}[H]
+  \centering
+  \caption{Analytical vs.\ linear FEA ($\mu_r = 4000$) comparison.}
+  \label{tab:comparison}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{|l|r|r|r|}
+    \hline
+    \textbf{Quantity} & \textbf{Analytical} & \textbf{FEA (linear)} & \textbf{Difference} \\
+    \hline
+    $L_{\max}$ (mH)                   & 42.41 & 53.14 & $+25.3\%$ \\
+    $L_{\min}$ (mH)                   &  8.48 & 17.07 & $+101\%$  \\
+    $T_{\mathrm{peak}}$ (mN$\cdot$m)  & 106.0 & 104.9 & $-1.0\%$  \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Fringing flux} is the dominant source of discrepancy in
+inductance.  At the unaligned position the total air gap is
+$5\unit{mm}$, which is comparable to the core width ($15\unit{mm}$);
+fringing fields extend well beyond the pole face and significantly
+increase the effective flux area.  This raises $L_{\min}$ by roughly a
+factor of two compared to the analytical result.  At the aligned
+position (gap $= 1\unit{mm}$), fringing is less severe, giving only a
+$25\%$ increase in $L_{\max}$.  Since the material is linear, there is
+no saturation; the high $\mu_r = 4000$ means the core reluctance is
+negligible and the infinite-permeability assumption of the analytical
+model is well justified.
+
+\textbf{Torque peak} is essentially unchanged ($-1\%$) despite the
+large inductance differences.  Because torque depends on $dL/d\theta$,
+and fringing increases both $L_{\max}$ and $L_{\min}$ by similar
+absolute amounts, the slope of $L(\theta)$ and hence the peak torque
+remain nearly identical to the analytical prediction.
+
+\textbf{Torque asymmetry and shifted zero crossings.}
+The FEA torque curve is noticeably asymmetric about $90^{\circ}$ and
+$180^{\circ}$, whereas the analytical model is a perfect sinusoid.
+Two physical reasons explain this:
+
+\begin{enumerate}
+  \item \emph{Non-symmetric stator geometry.} The rotor centre is at
+        $(45,\,35)\unit{mm}$, offset $15\unit{mm}$ from the stator
+        centre $(30,\,35)\unit{mm}$.  The right yoke is only
+        $\sim 2\unit{mm}$ thick while the left leg is $15\unit{mm}$,
+        so the magnetic circuit has a different reluctance profile for
+        clockwise and counter-clockwise rotor excursions.
+
+  \item \emph{Non-sinusoidal inductance profile.} The D-shaped rotor
+        notch creates a flat plateau in $L(\theta)$ near the unaligned
+        position ($L \approx 17.1\unit{mH}$ from $85^{\circ}$ to
+        $95^{\circ}$).  Since $T = \tfrac{1}{2}I^2\,dL/d\theta$, a flat
+        region gives near-zero torque over a wider angular range than a
+        sinusoid predicts, and the slopes on either side are unequal.
+\end{enumerate}
+
+These effects are inherent to the actual geometry and are correctly
+captured by FEA but not by the sinusoidal analytical model.
 
 %% ============================================================
 \section{Q3 -- FEA Modelling (Non-Linear Materials)}
 
-\textit{Same as Q2 but with a non-linear (saturating) $B$--$H$ curve.}
-
 \subsection{Material Properties}
-\textit{[Describe the $B$--$H$ curve; include the plot in the Appendix.]}
+
+The same model was re-run with the stator and rotor assigned the
+\textbf{steel\_1010} material from the Maxwell library, using its full
+nonlinear $B$--$H$ saturation curve.  All other settings (mesh,
+boundary, sweep) were identical to Q2.  The $B$--$H$ curve for
+steel\_1010 is included in Appendix~\ref{app:bh}.
 
 \subsection{Flux Density Plots}
-\textit{[Insert plots for three positions.]}
+
+\textit{[Insert Maxwell flux-density vector plots at $0^{\circ}$,
+$45^{\circ}$, and $90^{\circ}$ for the nonlinear simulation.]}
 
 \subsection{Inductance and Stored Energy}
-\textit{[Insert results table.]}
+
+\textit{[Insert results table for the nonlinear case.  Note that
+$W = \tfrac{1}{2}LI^{2}$ is only an approximation here; the true
+stored energy must be computed from the co-energy integral.]}
 
 \subsection{Torque vs.\ Angle}
-\textit{[Insert torque vs.\ angle plot.]}
+
+\textit{[Insert torque vs.\ angle plot for the nonlinear simulation,
+compared with the linear FEA and analytical results.]}
 
 \subsection{Discussion}
-\textit{[Compare linear vs.\ non-linear FEA and analytical model.
-Discuss saturation, fringing, and the validity of the sinusoidal
-assumption.]}
+
+\textit{[Compare nonlinear vs.\ linear FEA.  Expected effects:
+saturation at the pole tips ($B > 1.5\unit{T}$) will reduce the
+effective permeability locally, lowering $L_{\max}$ compared to the
+linear case.  Discuss how fringing and saturation interact and whether
+the torque peak changes significantly.  Reference the $B$--$H$ curve in
+Appendix~\ref{app:bh}..]}
 
 %% ============================================================
 \section{Q4 -- Control Method for Continuous Rotation}
@@ -410,14 +531,19 @@ This is about $31.8\%$ of the peak torque.
 %% ============================================================
 \section{Conclusion}
 
-The analytical model predicts an inductance variation from
-$L_{\min} = 8.48\unit{mH}$ to $L_{\max} = 42.41\unit{mH}$, with a
-peak torque of $106\unit{mN\cdot m}$ under $2.5\unit{A}$ DC.
-Constant DC excitation produces zero average torque; switching the
-current on during the unaligned-to-aligned transition raises the
-average to approximately $33.8\unit{mN\cdot m}$.
-FEA results (linear and non-linear) will be added to refine these
-estimates and quantify the effects of fringing and saturation.
+The analytical model predicts $L_{\min} = 8.48\unit{mH}$,
+$L_{\max} = 42.41\unit{mH}$, and a peak torque of
+$106\unit{mN\cdot m}$ under $2.5\unit{A}$ DC.  Linear FEA with iron
+($\mu_r = 4000$) yields $L_{\min} = 17.07\unit{mH}$ and
+$L_{\max} = 53.14\unit{mH}$, primarily because fringing flux at the
+large unaligned gap is not captured by the analytical model.  Despite
+the large inductance discrepancy, the FEA peak torque
+($104.9\unit{mN\cdot m}$) matches the analytical value to within $1\%$,
+confirming that the sinusoidal torque expression is adequate for
+engineering purposes.  Nonlinear FEA (Q3) is expected to reduce
+$L_{\max}$ further due to core saturation.  Switching the DC excitation
+on during the productive stroke raises the average torque to
+approximately $33.8\unit{mN\cdot m}$.
 
 %% ============================================================
 \appendix
@@ -427,7 +553,10 @@ estimates and quantify the effects of fringing and saturation.
   caption={Analytical inductance and torque script
            (\texttt{analytical\_model.m}).}]{../analytical_model.m}
 
-\section{Material Properties}
-\textit{[Insert $B$--$H$ curve data for the steel used in Q2/Q3.]}
+\section{Material Properties -- steel\_1010 $B$--$H$ Curve}
+\label{app:bh}
+
+\textit{[Insert the $B$--$H$ curve table or plot for steel\_1010 as
+exported from the ANSYS Maxwell material library.]}
 
 \end{document}
