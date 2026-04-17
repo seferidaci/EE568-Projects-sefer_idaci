@@ -1,0 +1,15 @@
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+texput.log
+
+# Editor temp files
+*.tmp.*
+*.tmp
+
+# MATLAB autosave
+*.asv

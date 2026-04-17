@@ -11,6 +11,9 @@ theta_fea = cellfun(@(s) str2double(erase(s,'deg')),         raw(:,2));
 T_fea     = cellfun(@(s) str2double(erase(s,'NewtonMeter')), raw(:,3)) * 1e3;  % mN*m
 L_fea     = cellfun(@(s) str2double(erase(s,'nH')),          raw(:,4)) * 1e-6; % mH
 
+% CCW sweep -- Maxwell reports torque with the same convention as the
+% analytical model, so no sign correction is needed.
+
 %% 2. ANALYTICAL MODEL
 N    = 300;  I = 2.5;  mu0 = 4*pi*1e-7;
 Acore = 15e-3 * 25e-3;
@@ -47,7 +50,7 @@ fig = figure('Units','centimeters','Position',[2 2 22 16]);
 ax1 = subplot(2,1,1);
 plot(theta_an, L_an, 'b--', 'LineWidth', 1.5, 'DisplayName', 'Analytical');
 hold on;
-plot(theta_10, L_10, 'b-o', 'LineWidth', 1.5, 'MarkerSize', 4, ...
+plot(theta_10, L_10, 'b-o', 'LineWidth', 1.5, 'MarkerSize', 0.1, ...
      'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'b', 'DisplayName', 'FEA (linear iron, \mu_r=4000)');
 xlabel('Rotor angle \theta (deg)', 'FontSize', 11);
 ylabel('L(\theta)  (mH)',          'FontSize', 11);
@@ -60,7 +63,7 @@ set(ax1, 'FontSize', 10);
 ax2 = subplot(2,1,2);
 plot(theta_an, T_an, 'r--', 'LineWidth', 1.5, 'DisplayName', 'Analytical');
 hold on;
-plot(theta_10, T_10, 'r-o', 'LineWidth', 1.5, 'MarkerSize', 4, ...
+plot(theta_10, T_10, 'r-o', 'LineWidth', 1.5, 'MarkerSize', 0.1, ...
      'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r', 'DisplayName', 'FEA (linear iron, \mu_r=4000)');
 yline(0, 'k-', 'LineWidth', 0.8, 'HandleVisibility', 'off');
 xlabel('Rotor angle \theta (deg)', 'FontSize', 11);

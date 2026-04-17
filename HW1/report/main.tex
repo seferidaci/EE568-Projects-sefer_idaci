@@ -27,7 +27,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \lhead{EE568 -- Project 1}
-\rhead{Sefer \.{I}DAC\.{I} -- 2575421}
+\rhead{Sefer \.{I}DACI -- 2575421}
 \rfoot{\thepage}
 
 %% MATLAB listing style
@@ -64,7 +64,7 @@
   \vspace{2cm}
 
   \begin{tabular}{ll}
-    \textbf{Name:}           & Sefer \.{I}DAC\.{I} \\[6pt]
+    \textbf{Name:}           & Sefer \.{I}DACI \\[6pt]
     \textbf{Student Number:} & 2575421             \\[6pt]
     \textbf{Date:}           & \today              \\
   \end{tabular}
@@ -294,9 +294,7 @@ The main limitations of the model above and how to address them:
         reluctance $\mathcal{R}_{\mathrm{core}} =
         \ell_{\mathrm{core}}/(\mu_0\mu_r A_c)$ in series with the
         air-gap reluctance reduces $L_{\max}$ and changes the
-        $L_{\max}/L_{\min}$ ratio.  For silicon steel
-        ($\mu_r \approx 5000$) this effect is on the order of a few
-        percent.
+        $L_{\max}/L_{\min}$ ratio.
 
   \item \textbf{Magnetic saturation.} At high currents $\mu_r$ drops
         and $L$ becomes a function of both $\theta$ and $i$.
@@ -307,13 +305,12 @@ The main limitations of the model above and how to address them:
         edges is larger than $A_{\mathrm{core}}$.  A simple correction
         replaces $w_c$ and $d$ with $(w_c+\ell_g)$ and $(d+\ell_g)$,
         which increases both $L_{\max}$ and $L_{\min}$ (more so at the
-        larger gap). A 2-D FEA captures this automatically.
+        larger gap).
 
   \item \textbf{Non-sinusoidal profile.} The actual inductance
         variation follows the change in overlapping pole-arc area with
         angle and is closer to a trapezoidal shape than a sinusoid.
-        This can be captured analytically by integrating the air-gap
-        permeance over the overlap area as a function of $\theta$.
+        
 \end{enumerate}
 
 %% ============================================================
@@ -332,7 +329,7 @@ left leg.
 \begin{itemize}
   \item \textbf{Excitation:} Winding of 300~turns, $I = 2.5\unit{A}$ DC.
         Coil terminals added with opposite polarities.
-  \item \textbf{Boundary:} Balloon condition on a large surrounding region.
+  \item \textbf{Boundary:} Large surrounding rectangular region with magnetic potential set as zero.
   \item \textbf{Mesh:} $0.25\unit{mm}$ maximum element in the air gap;
         $1\unit{mm}$ on the core.  15 adaptive passes, $0.5\%$ energy
         error criterion.
@@ -344,8 +341,35 @@ left leg.
 
 \subsection{Flux Density Plots}
 
-\textit{[Insert Maxwell flux-density vector plots exported at
-$\theta = 0^{\circ}$, $45^{\circ}$, and $90^{\circ}$.]}
+Figures~\ref{fig:bfield_0}--\ref{fig:bfield_90} show the flux-density
+magnitude distribution from the linear FEA at the three key rotor positions.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{../rotor_angle_0_b_field_plot.png}
+  \caption{Flux density $|\mathbf{B}|$ at $\theta = 0^{\circ}$ (aligned).
+           The gap is minimal and the flux is concentrated uniformly across
+           the pole face.}
+  \label{fig:bfield_0}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{../rotor_angle_45_b_field_plot.png}
+  \caption{Flux density $|\mathbf{B}|$ at $\theta = 45^{\circ}$ (mid-stroke).
+           One edge of the rotor pole begins to leave the stator pole face;
+           fringing is visible at the partial-overlap corners.}
+  \label{fig:bfield_45}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{../rotor_angle_90_b_field_plot.png}
+  \caption{Flux density $|\mathbf{B}|$ at $\theta = 90^{\circ}$ (unaligned).
+           The rotor flat faces the pole, maximising the gap; flux spreads
+           widely due to fringing and $|\mathbf{B}|$ is substantially lower.}
+  \label{fig:bfield_90}
+\end{figure}
 
 \subsection{Inductance and Stored Energy}
 
@@ -460,28 +484,134 @@ steel\_1010 is included in Appendix~\ref{app:bh}.
 
 \subsection{Flux Density Plots}
 
-\textit{[Insert Maxwell flux-density vector plots at $0^{\circ}$,
-$45^{\circ}$, and $90^{\circ}$ for the nonlinear simulation.]}
+Figures~\ref{fig:bfield_nl_0}--\ref{fig:bfield_nl_90} show the
+flux-density magnitude at the three key rotor positions for the
+nonlinear simulation.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{../rotor_angle_0_b_field_plot_nonlinear.png}
+  \caption{Nonlinear FEA: $|\mathbf{B}|$ at $\theta = 0^{\circ}$ (aligned).
+           The core reaches moderate saturation ($B \approx 0.8\unit{T}$)
+           in the pole legs.}
+  \label{fig:bfield_nl_0}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{../rotor_angle_45_b_field_plot_nonlinear.png}
+  \caption{Nonlinear FEA: $|\mathbf{B}|$ at $\theta = 45^{\circ}$ (mid-stroke).
+           Flux density is lower than the aligned case; saturation effects
+           are reduced.}
+  \label{fig:bfield_nl_45}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{../rotor_angle_90_b_field_plot_nonlinear.png}
+  \caption{Nonlinear FEA: $|\mathbf{B}|$ at $\theta = 90^{\circ}$ (unaligned).
+           The large air gap dominates the reluctance; flux density in the
+           core is low ($B \approx 0.18\unit{T}$) and the material is in the
+           linear region of the $B$--$H$ curve.}
+  \label{fig:bfield_nl_90}
+\end{figure}
 
 \subsection{Inductance and Stored Energy}
 
-\textit{[Insert results table for the nonlinear case.  Note that
-$W = \tfrac{1}{2}LI^{2}$ is only an approximation here; the true
-stored energy must be computed from the co-energy integral.]}
+Inductance was extracted from the Matrix parameter on Winding1 using the
+same procedure as Q2.  The stored energy $W = \tfrac{1}{2}LI^{2}$ is
+listed as an approximation; for a nonlinear material the true stored
+energy is smaller because the $\lambda$--$i$ curve is concave
+(saturation reduces flux linkage at high currents relative to the linear
+prediction).
 
-\subsection{Torque vs.\ Angle}
+\begin{table}[H]
+  \centering
+  \caption{FEA (nonlinear -- steel\_1010) results at three rotor positions.
+           $W$ computed as $\tfrac{1}{2}LI^{2}$; overestimates true
+           stored energy due to saturation.}
+  \label{tab:fea_q3}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{|l|r|r|r|}
+    \hline
+    \textbf{Position} & $L$ (mH) & $W$ (mJ) & $T$ (mN$\cdot$m) \\
+    \hline
+    $\theta = 0^{\circ}$  (aligned)   & 44.24 & 138.3 & $\approx 0$ \\
+    $\theta = 45^{\circ}$             & 30.21 &  94.4 & $-78.1$     \\
+    $\theta = 90^{\circ}$ (unaligned) & 16.19 &  50.6 & $\approx 0$ \\
+    \hline
+  \end{tabular}
+\end{table}
 
-\textit{[Insert torque vs.\ angle plot for the nonlinear simulation,
-compared with the linear FEA and analytical results.]}
+\subsection{Torque vs.\ Angle -- Comparison with Linear FEA and Analytical Model}
+
+Figure~\ref{fig:nl_comparison} shows all three models overlaid.
+The nonlinear FEA was run with the same $5^{\circ}$ parametric sweep
+as the linear case.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{../nonlinear_comparison.png}
+  \caption{Inductance (top) and torque (bottom) vs.\ rotor angle for all
+           three models: analytical (dashed), linear FEA
+           ($\mu_r = 4000$), and nonlinear FEA (steel\_1010).}
+  \label{fig:nl_comparison}
+\end{figure}
 
 \subsection{Discussion}
 
-\textit{[Compare nonlinear vs.\ linear FEA.  Expected effects:
-saturation at the pole tips ($B > 1.5\unit{T}$) will reduce the
-effective permeability locally, lowering $L_{\max}$ compared to the
-linear case.  Discuss how fringing and saturation interact and whether
-the torque peak changes significantly.  Reference the $B$--$H$ curve in
-Appendix~\ref{app:bh}..]}
+Table~\ref{tab:nl_comparison} summarises the three-way comparison.
+
+\begin{table}[H]
+  \centering
+  \caption{Comparison of all three models.}
+  \label{tab:nl_comparison}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{|l|r|r|r|}
+    \hline
+    \textbf{Quantity} & \textbf{Analytical} & \textbf{FEA linear} & \textbf{FEA nonlinear} \\
+    \hline
+    $L_{\max}$ (mH)                   & 42.41 & 53.14 & 44.24 \\
+    $L_{\min}$ (mH)                   &  8.48 & 17.07 & 16.19 \\
+    $T_{\mathrm{peak}}$ (mN$\cdot$m)  & 106.0 & 104.9 & 78.1  \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Saturation reduces $L_{\max}$ significantly.}
+At the aligned position the total air gap is only $1\unit{mm}$, so most
+of the MMF ($750\unit{A\text{-}turns}$) drives flux through the core.
+With steel\_1010 the operating flux density reaches approximately
+$0.8\unit{T}$ in the pole legs; at this level the relative permeability
+of steel\_1010 is around $\mu_r \approx 700\text{--}900$, far below the
+$\mu_r = 4000$ assumed in Q2.  The effective core reluctance therefore
+rises, reducing $L_{\max}$ from $53.14\unit{mH}$ (linear FEA) to
+$44.24\unit{mH}$ (nonlinear FEA), a $16.8\%$ decrease.
+
+\textbf{$L_{\min}$ is nearly unchanged.}
+At the unaligned position the large air gap ($5\unit{mm}$) dominates
+the reluctance.  The core carries only $B \approx 0.18\unit{T}$, well
+within the linear region of the steel\_1010 curve (see
+Appendix~\ref{app:bh}), so saturation has negligible effect.
+$L_{\min}$ falls only from $17.07\unit{mH}$ to $16.19\unit{mH}$
+($-5\%$).
+
+\textbf{Peak torque is reduced by $\approx 25\%$.}
+Because $T_{\mathrm{peak}} = \tfrac{1}{2}I^{2}(L_{\max}-L_{\min})$,
+the drop in $L_{\max}$ with little change in $L_{\min}$ reduces
+$(L_{\max}-L_{\min})$ from $36.1\unit{mH}$ to $28.1\unit{mH}$, giving
+a peak torque of $78.1\unit{mN\cdot m}$ compared to
+$104.9\unit{mN\cdot m}$ for the linear model.
+
+\textbf{Fringing vs.\ saturation.}
+Both effects are present.  Fringing increases $L_{\max}$ above the
+analytical value (gap is small, fringing adds area), while saturation
+pushes $L_{\max}$ back down.  In this design the two effects partially
+cancel, leaving the nonlinear $L_{\max}$ ($44.24\unit{mH}$) only about
+$4\%$ above the analytical prediction ($42.41\unit{mH}$).  For
+$L_{\min}$, fringing dominates (gap is large, $\mu_r$ is high anyway),
+so the nonlinear and linear FEA values are nearly identical and both are
+roughly twice the analytical result.
 
 %% ============================================================
 \section{Q4 -- Control Method for Continuous Rotation}
@@ -510,11 +640,25 @@ With ideal on/off switching (on at $90^{\circ}$, off at $180^{\circ}$):
     &= \frac{1}{\pi}\int_{90^{\circ}}^{180^{\circ}}
        \frac{I^2}{2}(L_{\max}-L_{\min})(-\sin 2\theta)\,d\theta
      = \frac{T_{\mathrm{peak}}}{\pi}
-     \approx \frac{106.0}{\pi}
-     \approx 33.8\unit{mN\cdot m}
 \end{align}
 
-This is about $31.8\%$ of the peak torque.
+For the analytical model ($T_{\mathrm{peak}} = 106.0\unit{mN\cdot m}$):
+$T_{\mathrm{avg}} \approx 33.8\unit{mN\cdot m}$ ($31.8\%$ of peak).
+For the nonlinear FEA ($T_{\mathrm{peak}} = 78.1\unit{mN\cdot m}$):
+$T_{\mathrm{avg}} \approx 24.9\unit{mN\cdot m}$ ($31.8\%$ of peak, same ratio).
+
+Figure~\ref{fig:switched} shows the switched torque waveform for all
+three models.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{../switched_torque.png}
+  \caption{Switched-excitation torque: current is on only during the
+           positive-torque stroke ($90^{\circ}$--$180^{\circ}$ and
+           $270^{\circ}$--$360^{\circ}$).  Dotted horizontal lines show
+           the average torque for each model.}
+  \label{fig:switched}
+\end{figure}
 
 \subsection{Practical Considerations}
 
@@ -540,23 +684,58 @@ large unaligned gap is not captured by the analytical model.  Despite
 the large inductance discrepancy, the FEA peak torque
 ($104.9\unit{mN\cdot m}$) matches the analytical value to within $1\%$,
 confirming that the sinusoidal torque expression is adequate for
-engineering purposes.  Nonlinear FEA (Q3) is expected to reduce
-$L_{\max}$ further due to core saturation.  Switching the DC excitation
-on during the productive stroke raises the average torque to
-approximately $33.8\unit{mN\cdot m}$.
+engineering purposes.  Nonlinear FEA (Q3) with steel\_1010 reduces $L_{\max}$ to
+$44.24\unit{mH}$ due to core saturation at $B \approx 0.8\unit{T}$,
+while $L_{\min}$ is nearly unchanged ($16.19\unit{mH}$), lowering the
+peak torque to $78.1\unit{mN\cdot m}$.  Switching the excitation on
+during the positive-torque stroke raises the average torque to
+$33.8\unit{mN\cdot m}$ (analytical) and $24.9\unit{mN\cdot m}$
+(nonlinear FEA).
 
 %% ============================================================
 \appendix
 \section{MATLAB Code}
 
 \lstinputlisting[style=matlab,
-  caption={Analytical inductance and torque script
-           (\texttt{analytical\_model.m}).}]{../analytical_model.m}
+  caption={All figures script (\texttt{ee568\_hw1.m}).}]{../ee568_hw1.m}
 
 \section{Material Properties -- steel\_1010 $B$--$H$ Curve}
 \label{app:bh}
 
-\textit{[Insert the $B$--$H$ curve table or plot for steel\_1010 as
-exported from the ANSYS Maxwell material library.]}
+The $B$--$H$ data exported from the ANSYS Maxwell material library is
+plotted in Figure~\ref{fig:bh_curve} and tabulated in
+Table~\ref{tab:bh_data}.  The curve is generated by \texttt{ee568\_hw1.m}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{../bh_curve_steel1010.png}
+  \caption{$B$--$H$ curve for steel\_1010 (ANSYS Maxwell library).}
+  \label{fig:bh_curve}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{steel\_1010 $B$--$H$ data (22 points as exported).}
+  \label{tab:bh_data}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|r|r||r|r|}
+    \hline
+    $H$ (A/m) & $B$ (T) & $H$ (A/m) & $B$ (T) \\
+    \hline
+    0          & 0.000 & 3\,183.1    & 1.524 \\
+    238.7      & 0.200 & 4\,774.6    & 1.626 \\
+    318.3      & 0.320 & 6\,366.2    & 1.698 \\
+    358.1      & 0.400 & 7\,957.7    & 1.730 \\
+    437.7      & 0.501 & 15\,915.5   & 1.870 \\
+    477.5      & 0.561 & 31\,831.0   & 1.990 \\
+    636.6      & 0.791 & 47\,746.5   & 2.040 \\
+    795.8      & 0.931 & 63\,662.0   & 2.070 \\
+    1\,114.1   & 1.101 & 79\,577.5   & 2.095 \\
+    1\,273.2   & 1.202 & 159\,155.0  & 2.200 \\
+    1\,591.5   & 1.302 & 318\,310.0  & 2.400 \\
+    2\,228.2   & 1.403 &             &       \\
+    \hline
+  \end{tabular}
+\end{table}
 
 \end{document}
