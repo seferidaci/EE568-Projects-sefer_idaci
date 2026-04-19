@@ -11,5 +11,8 @@ texput.log
 *.tmp.*
 *.tmp
 
+# LaTeX table of contents
+*.toc
+
 # MATLAB autosave
 *.asv
