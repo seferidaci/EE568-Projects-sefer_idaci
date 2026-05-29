@@ -19,10 +19,9 @@ H, B = H[mask], B[mask]
 fig, ax = plt.subplots(figsize=(7, 4.2))
 ax.plot(H, B, "o-", color="#1f4eaf", lw=1.5, markersize=5)
 ax.axhline(1.4, ls="--", color="0.4", lw=1.0)
-ax.text(H_MAX * 0.95, 1.42, "knee ~1.4 T",
+ax.text(H_MAX * 0.98, 1.42, "knee ~1.4 T",
         ha="right", va="bottom", fontsize=9, color="0.4")
-ax.set_xscale("log")
-ax.set_xlim(20, H_MAX)
+ax.set_xlim(0, H_MAX)
 ax.set_ylim(0, 2.0)
 ax.set_xlabel(r"$H$ (A/m)")
 ax.set_ylabel(r"$B$ (T)")
