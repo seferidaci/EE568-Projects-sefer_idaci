@@ -34,6 +34,4 @@ texput.log
 # Project-local Claude instructions (per-clone)
 CLAUDE.md
 
-# Large media generated as previews, not source
-HW2/flux_density_gif.gif
 

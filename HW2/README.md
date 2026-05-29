@@ -68,6 +68,10 @@ Magnetostatic parametric sweep of rotor position (0–90° mech in 1° steps) at
 | Flux per pole Φ_pole | 2.18 mWb | 2.11 mWb | −3.0% |
 | Cogging T_p-p (no-load) | — | 4.4 mN·m (0.09% rated) | — |
 
+### No-load flux density animation (rotor rotating 0 → 90° mech)
+
+![Flux density animation](q4_flux_density.gif)
+
 | ![B-vector full](q4_bvec_full.png) | ![Air-gap B](q4_bgap_surface.png) |
 |:---:|:---:|
 | No-load B-vectors, full cross-section | \|B\| across the air-gap |
