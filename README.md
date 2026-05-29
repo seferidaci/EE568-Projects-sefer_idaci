@@ -1,48 +1,31 @@
-# EE568 – Design of Electrical Machines
-### Project 1: Torque in a Variable Reluctance Machine
-**Sefer İDACİ — 2575421**
+# EE568 — Design of Electrical Machines
 
----
+**Sefer İDACİ — 2575421** · Middle East Technical University · Spring 2026
 
-## B-Field Animations
+Coursework projects for EE568 (Graduate-level *Design of Electrical Machines*).
 
-**Linear material (μr = 4000)**
+## Projects
 
-![Linear B-field animation](HW1/animation.gif)
+| # | Topic | Folder | Report |
+|---|---|---|---|
+| **HW1** | Switched Reluctance Motor — analytical model, linear vs.\ non-linear FEA in ANSYS Maxwell | [HW1/](HW1/) | [PDF](HW1/report/) |
+| **HW2** | Surface-PM Synchronous Machine (Design 1: 15 slots / 8 poles, FSCW) — winding design, analytical sizing, 2D FEA verification | [HW2/](HW2/) | [PDF](HW2/report/EE568_HW2_Report_Sefer_IDACI_2575421.pdf) |
 
-**Nonlinear material (steel_1010)**
-
-![Nonlinear B-field animation](HW1/animation_nonlinear.gif)
-
----
-
-## Key Results
-
-| Model | L_max (mH) | L_min (mH) | T_peak (mN·m) | T_avg switched (mN·m) |
-|---|---|---|---|---|
-| Analytical | 42.41 | 8.48 | 106.0 | 33.8 |
-| FEA linear (μr = 4000) | 53.14 | 17.07 | 104.9 | 31.6 |
-| FEA nonlinear (steel_1010) | 44.24 | 16.19 | 78.1 | 24.9 |
-
-### Inductance & Torque — All Models
-![Comparison plot](HW1/nonlinear_comparison.png)
-
-### Switched Excitation (Q4)
-![Switched torque](HW1/switched_torque.png)
-
-### B–H Curve (steel_1010)
-![BH curve](HW1/bh_curve_steel1010.png)
-
----
-
-## Contents
+## Repository layout
 
 ```
-HW1/
-├── ee568_hw1.m                               # All MATLAB figures (one script)
-├── ParametricSetup1_Result.csv               # Linear FEA parametric sweep
-├── ParametricSetup1_Result_nonlinear.csv     # Nonlinear FEA parametric sweep
-├── steel1010_bh_curve.tab                    # B-H data exported from Maxwell
-├── report/main.tex                           # LaTeX report source
-└── report/main.pdf                           # Compiled report
+EE568-Projects-sefer_idaci/
+├── HW1/                       # Project 1 — SRM analysis & FEA
+├── HW2/                       # Project 2 — SPMSM design & FEA
+├── Lecture_Notes/             # Hand-typed lecture notes (LaTeX)
+└── README.md
 ```
+
+## Building the HW2 report
+
+```bash
+cd HW2/report
+pdflatex EE568_HW2_Report_Sefer_IDACI_2575421.tex   # run twice for ToC + cross-refs
+```
+
+Requires a working MATLAB installation (R2022b or newer) to regenerate the Q1–Q3 analytical figures via [HW2/ee568_hw2_analytical.m](HW2/ee568_hw2_analytical.m), and Python 3.11+ with `numpy` and `matplotlib` to regenerate the Q4 FEA post-processing figures via [HW2/q4_bg_postprocess.py](HW2/q4_bg_postprocess.py).

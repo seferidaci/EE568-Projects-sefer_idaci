@@ -16,3 +16,24 @@ texput.log
 
 # MATLAB autosave
 *.asv
+
+# ANSYS Maxwell solver intermediates (keep the .aedt project file only)
+*.aedtresults/
+*.aedt.lock
+*.lock.txt
+*.aedt.bak
+*.aedh
+*.q3d.bak
+
+# Browser-saved reference pages (large, not source material)
+*.htm
+*.html
+*.php
+*_files/
+
+# Project-local Claude instructions (per-clone)
+CLAUDE.md
+
+# Large media generated as previews, not source
+HW2/flux_density_gif.gif
+

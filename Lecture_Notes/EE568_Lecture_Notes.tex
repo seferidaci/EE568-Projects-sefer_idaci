@@ -1,0 +1,1280 @@
+%% EE568 -- Design of Electrical Machines
+%% Course lecture notes, typeset from handwritten notes (Spring 2026)
+%% Compile: pdflatex EE568_Lecture_Notes.tex  (run twice for the ToC)
+
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{fancyhdr}
+\usepackage[table]{xcolor}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\setlength{\headheight}{15pt}
+\setlength{\parskip}{6pt}
+
+\newcommand{\unit}[1]{\ensuremath{\,\mathrm{#1}}}
+\newcommand{\degree}{\ensuremath{^{\circ}}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{EE568 -- Lecture Notes}
+\rhead{Design of Electrical Machines}
+\rfoot{\thepage}
+
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue!70!black}
+
+\title{\textbf{EE568 -- Design of Electrical Machines}\\[4pt]
+       \large Lecture Notes}
+\author{Middle East Technical University \\
+        Department of Electrical and Electronics Engineering \\[4pt]
+        Compiled by Sefer \.{I}DACI}
+\date{Spring 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent
+These notes were typeset from the handwritten course notes of EE568
+``Design of Electrical Machines'' at METU, Spring 2026. They follow the
+flow of the lectures: starting from magnetic-circuit fundamentals, then
+building up to the design of distributed and fractional-slot windings,
+to the output equation that sizes a machine, and finally to the
+practical constraints (mechanical, magnetic, thermal) that shape the
+final geometry. The classical references are the books by
+Pyrh\"onen et~al.\ (\textit{Design of Rotating Electrical Machines},
+Wiley) and Hanselman (\textit{Brushless Permanent Magnet Motor Design},
+Magna Physics); equation numbering does not follow either book.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Magnetic Fundamentals}
+\label{sec:magnetics}
+
+\subsection{Electric--Magnetic Analogy}
+
+A magnetic circuit obeys the same network laws as an electric circuit
+once the analogous quantities are identified
+(Table~\ref{tab:analogy}).
+The driving quantity for current in the electric circuit is the voltage
+$V$; in the magnetic circuit it is the magnetomotive force (MMF)
+$NI$, the product of the coil turns and the current they carry.
+The opposing quantity is the resistance $R$ on the electric side and
+the reluctance $\mathcal{R}$ on the magnetic side.
+The resulting flow quantities are current $I$ and flux $\Phi$:
+\begin{equation}
+  V = IR
+  \qquad\Longleftrightarrow\qquad
+  NI = \Phi\,\mathcal{R}
+\end{equation}
+
+\begin{table}[H]
+  \centering
+  \caption{Analogous quantities in electric and magnetic circuits.}
+  \label{tab:analogy}
+  \begin{tabular}{lll}
+    \toprule
+    Quantity (electric) & (magnetic) & Definition \\
+    \midrule
+    Voltage $V$\unit{[V]}             & MMF $NI$\unit{[A\!\cdot\!t]}   & driving source \\
+    Current $I$\unit{[A]}             & Flux $\Phi$\unit{[Wb]}         & flow quantity \\
+    Current density $J = \sigma E$\unit{[A/m^2]} & Flux density $B = \mu H$\unit{[Wb/m^2 = T]} & flow per area \\
+    Field $E$\unit{[V/m]}             & Field $H$\unit{[A/m]}          & gradient of source \\
+    Conductivity $\sigma$             & Permeability $\mu$              & material property \\
+    Resistance $R = \ell/(\sigma A)$  & Reluctance $\mathcal{R} = \ell/(\mu A)$ & opposes flow \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+For a series magnetic path of $n$ segments,
+$\mathcal{R}_\text{tot} = \sum_i \ell_i/(\mu_i A_i)$.
+The inductance of an $N$-turn coil wound on a magnetic circuit of total
+reluctance $\mathcal{R}$ is
+\begin{equation}
+  L = \frac{\lambda}{I} = \frac{N\Phi}{I} = \frac{N \cdot NI/\mathcal{R}}{I}
+    = \frac{N^2}{\mathcal{R}}
+  \label{eq:L_rel}
+\end{equation}
+
+\subsection{Air is a Circuit Element}
+
+A magnetic circuit cannot be drawn the way an electric circuit can,
+because flux always closes on itself \emph{including through air}.
+Whenever the path through a high-permeability core encounters a gap,
+the air gap appears in series with a large reluctance
+$\mathcal{R}_g = g/(\mu_0 A)$.
+Since $\mu_\text{Fe}/\mu_0$ is typically $10^3$--$10^4$, even a
+millimetre-thick gap dominates the total reluctance of a machine
+magnetic circuit. This is the central reason why electrical machines
+are sized by their air-gap geometry rather than by their iron
+geometry.
+
+\subsection{B--H Curves and Permeability}
+
+Magnetic materials are non-linear: $B(H)$ saturates and follows a
+hysteresis loop on reversal.
+Two different ``permeabilities'' are commonly quoted
+(Figure~\ref{fig:bh}):
+\begin{itemize}[noitemsep]
+  \item \textbf{Apparent permeability} $\mu = B/H$ -- the secant slope
+        from the origin to the operating point. Used when the material
+        is treated as linear at one operating point.
+  \item \textbf{Incremental permeability} $\mu = dB/dH$ -- the local
+        tangent slope. Relevant for small-signal AC excitation
+        superimposed on a DC bias.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.45\textwidth}\centering
+    \textit{B-H curve, single-valued} \\[2pt]
+    (linear-material approximation; secant and tangent slopes shown).
+  \end{minipage}\hfill
+  \begin{minipage}{0.45\textwidth}\centering
+    \textit{Hysteresis loop} \\[2pt]
+    (coercive force $H_c$; loop area = hysteresis loss per cycle).
+  \end{minipage}
+  \caption{Magnetic material behaviour. Hysteresis loss is independent
+           of frequency per cycle, so the total loss scales linearly
+           with frequency.}
+  \label{fig:bh}
+\end{figure}
+
+\paragraph{Coercive force and hard vs soft materials.}
+The coercive force $H_c$ is the value of $H$ required to drive $B$ back
+to zero from remanence. Materials with small $H_c$ are easily
+demagnetised and are called \emph{soft} (used for cores); materials
+with large $H_c$ are hard to demagnetise and are called \emph{hard}
+(used for permanent magnets). The product $|B||H|$ in the second
+quadrant defines the \emph{maximum energy product} -- the figure of
+merit for a permanent magnet (Section~\ref{sec:pm}).
+
+\subsection{Core Losses}
+
+Two mechanisms convert magnetic flux variation into heat in
+ferromagnetic cores:
+\begin{enumerate}[noitemsep]
+  \item \textbf{Hysteresis loss.} Loop area per cycle; loss per second
+        $\propto f$ (independent of the magnetic properties per cycle,
+        related to the cyclic reversal of domain orientation).
+        For a 50\unit{Hz} machine the loop traverses 50 times per
+        second.
+  \item \textbf{Eddy-current loss.} Induced EMFs in the laminations
+        circulate currents that dissipate in the core resistance.
+\end{enumerate}
+
+\paragraph{Eddy-current loss derivation.}
+A small loop of resistance $R$ in the laminating direction sees the
+induced EMF $e = N\,d\Phi/dt$.
+If the flux is sinusoidal with peak $\hat{B}$ and frequency $f$:
+$e \propto \hat{B}\,f$, so $V \propto \hat{B}\,f$ and
+$P_\text{eddy} = V^2/R \propto \hat{B}^2 f^2$.
+Including the lamination conductivity $\sigma$ and thickness
+explicitly,
+\begin{equation}
+  P_\text{eddy} \;\propto\; \sigma\,\hat{B}^2\,f^2
+  \label{eq:peddy}
+\end{equation}
+Lamination of the core breaks the loop into many small parallel
+sheets, raising the effective $R$ and reducing $P_\text{eddy}$.
+
+\paragraph{Total core loss.}
+$P_\text{core} = P_\text{hyst} + P_\text{eddy}$.
+At 50\unit{Hz} this is dominated by hysteresis; at high frequency
+(PWM-driven motors) eddy losses dominate.
+
+\subsection{Faraday's Law and Inductance}
+
+The induced voltage on an $N$-turn coil is
+\begin{equation}
+  e = -\,N\frac{d\Phi}{dt}
+    = -\,\frac{d\lambda}{dt}
+    = -\,\frac{d(N\Phi)}{dt}
+\end{equation}
+where $\lambda = N\Phi$ is the flux linkage.
+The inductance is defined as
+\begin{equation}
+  L = \frac{d\lambda}{dI}
+    = N\frac{d\Phi}{dI}
+\end{equation}
+For a \emph{linear} material with constant $\mathcal{R}$,
+$\Phi = NI/\mathcal{R}$ so $L = N^2/\mathcal{R}$ as in
+Eq.~\eqref{eq:L_rel}. For a non-linear material with saturation,
+$\lambda(I)$ is a curve that bends over (Figure~\ref{fig:lambda_I});
+$L = \lambda/I$ is then \emph{not} a constant and the value
+$\tfrac{1}{2}LI^2$ is \emph{not} the stored energy.
+
+\begin{figure}[H]
+  \centering
+  \textit{$\lambda$--$I$ curve} (linear region near origin, saturating at high $I$;
+   $L=\lambda/I$ only valid in the linear region).
+  \caption{Flux linkage as a function of current.}
+  \label{fig:lambda_I}
+\end{figure}
+
+\subsection{Non-Uniform Flux, Fringing and Leakage}
+
+Real magnetic circuits depart from the ideal in several ways:
+\begin{itemize}[noitemsep]
+  \item \textbf{Fringing flux} bulges outward in the air gap; the
+        effective gap cross-section is larger than the iron face.
+  \item \textbf{Leakage flux} bypasses the intended path (slot-leakage,
+        end-winding leakage, magnet-to-magnet leakage).
+  \item Non-uniform flux density across a section can arise because the
+        inner part of a curved iron path is shorter and thus has lower
+        reluctance, attracting more flux ($B_\text{in} > B_\text{out}$).
+\end{itemize}
+These effects are accounted for either by Carter's coefficient
+(Section~\ref{sec:carter}) or by an explicit reluctance network.
+
+\subsection{Energy Storage in the Magnetic Field}
+
+For a linear material the energy density is
+\begin{equation}
+  w = \int H\,dB = \frac{1}{2}\,B H = \frac{B^2}{2\mu}
+  \label{eq:wdensity}
+\end{equation}
+and the total stored energy in a volume $V$ is
+\begin{equation}
+  W = \tfrac{1}{2}\,L I^2
+    = \frac{1}{2}\,\frac{B^2}{\mu}\,V
+\end{equation}
+At fixed $B$, low $\mu$ stores more energy per unit volume; this is
+why an air gap is added when a large amount of energy must be stored
+(inductors, transformers in flyback mode, etc.). Conversely, for
+\emph{zero-energy} flux paths (the iron in a machine) high
+$\mu$ minimises the stored field energy and the magnetising current.
+
+\paragraph{Maxwell stress.}
+The tangential stress on an iron surface in a normal field $B$ is
+\begin{equation}
+  \sigma_\text{Maxwell} = \frac{B^2}{2\mu_0}
+  \quad\unit{[N/m^2 = Pa]}
+  \label{eq:maxwell}
+\end{equation}
+This is the same as the energy density of Eq.~\eqref{eq:wdensity};
+the units check because $\unit{J/m^3} = \unit{N/m^2}$. The integral of
+this stress over the air-gap surface times the rotor radius gives the
+electromagnetic torque (Section~\ref{sec:sizing}).
+
+% =====================================================================
+\section{AC Machine Equivalent Circuit}
+\label{sec:eqckt}
+
+The per-phase steady-state equivalent circuit of an AC machine
+(induction motor with the slip-dependent rotor branch as an example)
+is shown in Figure~\ref{fig:eqckt}.
+The stator branch has $R_s + jX_s$, where $X_s = \omega L_{s\sigma}$
+is the stator leakage reactance.
+The shunt branch carries the magnetising current and the iron losses:
+$R_c$ in parallel with $jX_m = j\omega L_m$.
+The rotor branch (referred to the stator) is $R_r' + jX_r'$, with the
+``mechanical resistance'' $R_r'(1-s)/s$ representing the converted
+mechanical power.
+
+\begin{figure}[H]
+  \centering
+  \textit{Per-phase equivalent circuit: $X_s, R_s$ -- $\;[R_c\parallel jX_m]\;$ -- $X_r', R_r', \, R_r'(1-s)/s$.}
+  \caption{Per-phase steady-state equivalent circuit of an induction
+           machine.}
+  \label{fig:eqckt}
+\end{figure}
+
+\paragraph{Leakage inductance vs.\ magnetising inductance.}
+The leakage path is partly air, so $L_{s\sigma}$ is closer to a linear
+inductor (small saturation) and is dominated by the slot/end-winding
+geometry rather than the iron. The magnetising inductance $L_m$ is set
+by the air gap and the iron and saturates with $I_m$.
+
+% =====================================================================
+\section{Integral-Slot Distributed Windings}
+\label{sec:integral}
+
+A polyphase winding placed in slots produces an MMF wave that travels
+around the air gap. The quality of this wave -- how close it is to a
+pure sinusoid, how large the fundamental component is relative to the
+peak ampere-conductor count -- is described by the
+\emph{winding factor} $k_w$.
+
+\subsection{Slots per Pole per Phase}
+
+For a machine with $N_s$ stator slots, $m$ phases and $2p$ poles,
+\begin{equation}
+  q = \frac{N_s}{2p\,m}
+  \label{eq:q}
+\end{equation}
+is the number of slots per pole per phase. When $q$ is a positive
+integer, the winding is \emph{integral-slot} (this section); when $q$
+is a non-integer rational, the winding is \emph{fractional-slot}
+(Section~\ref{sec:fractional}).
+
+The slot pitch in electrical degrees is
+\begin{equation}
+  \alpha_e = \frac{p \cdot 360\degree}{N_s}
+\end{equation}
+
+\paragraph{Worked example -- 6-slot, 2-pole, 3-phase machine.}
+Here $p=1$, $m=3$, $N_s=6$, so $q=1$ and $\alpha_e = 60\degree$.
+The phase assignment to the six slots is
+\begin{center}
+  \begin{tabular}{c|cccccc}
+    \toprule
+    Slot   & 1 & 2 & 3 & 4 & 5 & 6 \\
+    Phase  & A$+$ & C$-$ & B$+$ & A$-$ & C$+$ & B$-$ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+which yields a 60\degree-sector pattern repeating every pole-pair.
+
+\subsection{MMF of a Concentrated Coil}
+
+A single-slot full-pitch coil produces a rectangular MMF wave of
+amplitude $NI/2$ on each side of the magnetic axis, switching sign at
+$\pm\pi$ (electrical).
+The Fourier expansion of this square wave is
+\begin{equation}
+  \mathrm{MMF}(\theta) = \frac{4}{\pi}\cdot\frac{NI}{2}
+  \sum_{n=1,3,5,\ldots}\frac{1}{n}\sin(n\theta)
+\end{equation}
+so the fundamental amplitude is
+\begin{equation}
+  \widehat{\mathrm{MMF}}_1 = \frac{4}{\pi}\cdot\frac{NI}{2}
+\end{equation}
+A \emph{distributed} winding (multiple coils per phase per pole spread
+across $q$ adjacent slots) produces a stepped waveform that approaches
+a sinusoid as $q$ grows, attenuating the high-order harmonics.
+
+\subsection{Distribution Factor $k_d$}
+
+When $q$ coils share one pole-phase belt, their individual EMF
+phasors are offset by $\alpha_e$ each, so the resultant is the vector
+sum (a chord of the circumscribed polygon) rather than the arithmetic
+sum:
+\begin{equation}
+  k_d = \frac{\text{vector sum of }q\text{ coil EMFs}}
+             {\text{arithmetic sum}}
+\end{equation}
+The geometric-series identity gives
+\begin{equation}
+  k_{d,n} = \frac{\sin\!\bigl(n\,q\,\alpha_e/2\bigr)}
+                 {q\,\sin\!\bigl(n\,\alpha_e/2\bigr)}
+  \label{eq:kd}
+\end{equation}
+For the fundamental ($n=1$), $k_d$ is just below unity and increases
+toward 1 as $q$ increases (smoother distribution). For higher
+harmonics, $k_d$ drops sharply, which is the harmonic-attenuation
+benefit of distribution.
+
+\subsection{Pitch Factor $k_p$}
+
+A \emph{full-pitch} coil has its two sides exactly one pole pitch
+apart, so the two side EMFs are 180\degree\ out of phase and add
+constructively in the coil loop.
+A \emph{short-pitch} coil has its sides closer than one pole pitch by
+some fraction $\lambda$ of the pole pitch, $0 < \lambda \le \pi$
+(electrical). The vector subtraction of the two side EMFs has
+magnitude $2\hat{E}\sin(\lambda/2)$ instead of $2\hat{E}$:
+\begin{equation}
+  k_{p,n} = \sin\!\left(\frac{n\,\lambda}{2}\right)
+  \label{eq:kp}
+\end{equation}
+For the fundamental, $k_p \le 1$.
+At $\lambda = \pi(1 - 1/n)$, $k_{p,n} = 0$ and the $n$-th harmonic is
+eliminated entirely.
+Common choices:
+\begin{itemize}[noitemsep]
+  \item $\lambda = 5/6\,\pi$ (150\degree, ``5/6 pitched'') --
+        suppresses the 11th and 13th in a three-phase machine.
+  \item $\lambda = 2/3\,\pi$ (120\degree) -- eliminates the third
+        harmonic (and triplens).
+  \item $\lambda = 4/5\,\pi$ (144\degree) -- eliminates the fifth.
+\end{itemize}
+
+\paragraph{Why eliminate harmonics.}
+Space harmonics of the MMF do not contribute average torque (only the
+fundamental does), but they produce iron losses, torque ripple,
+acoustic noise, and parasitic asynchronous torques. Even harmonics
+imply DC bias in the field distribution and are absent by construction
+in a balanced winding (each half of the loop sees both $+$ and $-$
+poles).
+
+\subsection{Winding Factor $k_w$}
+
+The total winding factor combines both effects:
+\begin{equation}
+  k_{w,n} = k_{d,n}\cdot k_{p,n}
+  \label{eq:kw}
+\end{equation}
+A high $k_{w,1}$ maximises torque density; a low $k_{w,n}$
+for $n>1$ reduces harmonic content.
+
+\subsection{Worked Example -- 180-slot, 50 Hz, 10-Pole Alternator}
+
+A rotating field produced by a balanced 3-phase 50\unit{Hz}, 600\unit{rpm}
+alternator has the magnetic flux distribution
+\begin{equation}
+  B(\theta) = 0.9\sin\theta + 0.25\sin 3\theta + 0.18\sin 5\theta
+\end{equation}
+The machine has 180 slots, double-layer Y-connected winding, each coil
+of 3 turns and coil span 15 slots. Armature diameter $D = 1.35\unit{m}$,
+effective axial length $L = 0.5\unit{m}$.
+
+\emph{Number of poles.}
+$f_m = 600/60 = 10\unit{Hz}$, $f_e = 50\unit{Hz}$, so
+$p = f_e/f_m = 5$ pole-pairs (10 poles).
+
+\emph{Slots per pole per phase.}
+$q = 180/(3\cdot 10) = 6$.
+
+\emph{Pole area.}
+\begin{equation}
+  A_\text{pole} = \frac{\pi D L}{2p}
+                = \frac{\pi \cdot 1.35 \cdot 0.5}{10}
+                = 0.212\unit{m^2}
+\end{equation}
+
+\emph{Slot pitch (electrical) and coil pitch.}
+$\alpha_e = (360\degree/180)\cdot p = 10\degree$ electrical;
+coil span 15 slots $\Rightarrow$ $\lambda = 150\degree$ electrical.
+
+\emph{Distribution factors.}
+\begin{align*}
+  k_{d,1} &= \sin(6\cdot 10\degree/2)/(6\sin(10\degree/2))
+           = \sin 30\degree / (6\sin 5\degree)
+           = 0.956\\
+  k_{d,3} &= \sin 90\degree / (6\sin 15\degree) = 0.643\\
+  k_{d,5} &= \sin 150\degree / (6\sin 25\degree) = 0.197
+\end{align*}
+
+\emph{Pitch factors.}
+\begin{align*}
+  k_{p,1} &= \sin(150\degree/2) = \sin 75\degree = 0.966\\
+  k_{p,3} &= \sin 225\degree = -0.707\\
+  k_{p,5} &= \sin 375\degree = \sin 15\degree = 0.259
+\end{align*}
+
+\emph{Winding factors.}
+\begin{equation}
+  k_{w,1} = 0.923,\quad
+  k_{w,3} = -0.455,\quad
+  k_{w,5} = 0.051
+\end{equation}
+
+\emph{Peak flux per pole (fundamental).}
+\begin{equation}
+  \hat{\Phi}_1 = \frac{2}{\pi}\,\hat{B}_1\,A_\text{pole}
+               = \frac{2}{\pi}\cdot 0.9\cdot 0.212 = 0.1214\unit{Wb}
+               = 121.4\unit{mWb}
+\end{equation}
+
+\emph{Turns per phase.}
+For $q=6$, $2p=10$, 3 turns per coil, double-layer:
+$N_s = q\cdot 2p\cdot 3 = 180$ turns per phase.
+
+\emph{Induced phase voltage (per harmonic) by Faraday.}
+The classical alternator formula is
+\begin{equation}
+  V_\text{ind,phase}
+    = \frac{2\pi}{\sqrt{2}}\,f\,N_s\,\hat{B}\,A_\text{pole}\,k_{w,n}
+    = 4.44\,f\,N_s\,\hat{B}\,A_\text{pole}\,k_{w,n}
+\end{equation}
+For the three harmonics:
+\begin{center}
+  $V_1 \approx 4480\unit{V}$,\quad $V_3 \approx -613\unit{V}$,\quad $V_5 \approx 49.5\unit{V}$ (rms)
+\end{center}
+The phase voltage is the RMS sum
+$V_\text{ph} = \sqrt{V_1^2 + V_3^2 + V_5^2}$.
+The Y-connection eliminates the third harmonic from the line-to-line
+voltage (triplens are in phase across the three phases), so the
+\emph{line} voltage waveform is much closer to sinusoidal than the
+phase voltage.
+
+% =====================================================================
+\section{Fractional-Slot Windings}
+\label{sec:fractional}
+
+A \emph{fractional-slot} winding has $q \notin \mathbb{Z}$.
+Such windings are common in low-speed, high-pole-count machines
+(direct-drive PM motors, in particular). Their main practical
+advantages are:
+\begin{itemize}[noitemsep]
+  \item Short end-windings (when $q<1$, tooth-coil), lower copper
+        volume and lower DC resistance.
+  \item Reduction of cogging torque, because the slot/pole
+        symmetry is broken.
+  \item Better stator-winding fault tolerance (faulty coils can be
+        isolated without unbalancing the rotating field).
+\end{itemize}
+Their main disadvantages are:
+\begin{itemize}[noitemsep]
+  \item Lower fundamental winding factor (in general) than a
+        comparable distributed winding.
+  \item Rich harmonic content of the MMF, including \emph{sub}-harmonics
+        that can saturate the rotor back-iron of PM machines and
+        cause additional rotor losses.
+  \item More complex analysis: closed-form $k_d$, $k_p$ no longer
+        apply; the star-of-slots method is needed instead.
+\end{itemize}
+
+\subsection{Star of Slots}
+
+Each slot $k$ is assigned an EMF phasor at electrical angle
+\begin{equation}
+  \varphi_k = (k-1)\,\alpha_s \pmod{360\degree},
+  \qquad
+  \alpha_s = \frac{p\cdot 360\degree}{N_s}
+  \label{eq:star_of_slots}
+\end{equation}
+The $N_s$ phasors form a star (or a regular polygon traced multiple
+times, depending on $\gcd(N_s,p)$).
+For a balanced three-phase winding the $360\degree$ circle is divided
+into six $60\degree$ sectors:
+\begin{center}
+  A$+$: $[0\degree,60\degree)$;\quad
+  C$-$: $[60\degree,120\degree)$;\quad
+  B$+$: $[120\degree,180\degree)$;\quad
+  A$-$: $[180\degree,240\degree)$;\quad
+  C$+$: $[240\degree,300\degree)$;\quad
+  B$-$: $[300\degree,360\degree)$
+\end{center}
+Each slot is assigned to the phase whose sector contains its phasor.
+The $n$-th harmonic winding factor is then computed by the
+phasor sum
+\begin{equation}
+  k_{w,n} = \frac{1}{N_{ph}}
+  \left|\sum_{k\in\text{ph}^+} e^{jn\varphi_k}
+        + \sum_{k\in\text{ph}^-} e^{j(n\varphi_k + \pi)}\right|
+\end{equation}
+where $N_{ph}$ is the number of slots per phase and ph$^+$/ph$^-$ are
+the positive and negative slots of that phase.
+
+\subsection{Balancing Condition}
+
+For a three-phase winding to be balanced, the number of slots per
+phase $N_s/m$ must be an integer:
+\begin{equation}
+  \frac{N_s}{m} \in \mathbb{Z}^+
+  \label{eq:balance}
+\end{equation}
+This is necessary but not sufficient; in addition,
+$\gcd(N_s, 2p)$ should be such that the phasor stars of the three
+phases are identical apart from a 120\degree\ rotation.
+For example:
+\begin{itemize}[noitemsep]
+  \item 10-pole, 30 slots: $q=1$, integral, balanced.
+  \item 10-pole, 60 slots: $q=2$, integral, balanced.
+  \item 10-pole, 42 slots: $q=7/5$, fractional;
+        $42/3 = 14$ slots/phase is integer, balanced.
+  \item 10-pole, 44 slots: $44/3$ is not integer -- not balanced.
+\end{itemize}
+
+\subsection{Slot/Pole Combinations}
+
+Some slot/pole combinations have particularly high fundamental winding
+factor and low cogging torque; tabulated examples (see Pyrh\"onen
+Table~2.5) include
+\begin{itemize}[noitemsep]
+  \item 12-slot, 10-pole ($k_{w,1}\approx 0.933$);
+  \item 12-slot, 14-pole ($k_{w,1}\approx 0.933$);
+  \item 15-slot, 14-pole;
+  \item 18-slot, 16-pole.
+\end{itemize}
+Multiples of these basic units (24/20, 24/28, \ldots) are also widely
+used.
+
+\subsection{Worked Example -- 12 Slots, 10 Poles, Single Layer}
+
+$\alpha_s = (360\degree/12)\cdot 5 = 150\degree$ electrical.
+Drawing the 12 phasors on the star and grouping them by 60\degree\
+sector yields 4 slots per phase (overlapping pairs at the same
+angle). The fundamental winding factor obtained from the phasor sum
+is $k_{w,1}\approx 0.933$. This combination uses tooth-coil (concentrated)
+windings -- each coil is wound around one stator tooth, dramatically
+shortening the end winding.
+
+% =====================================================================
+\section{Machine Sizing -- The Output Equation}
+\label{sec:sizing}
+
+The classical \emph{sizing equation} relates the apparent power
+delivered by an AC machine to its airgap volume, the electric loading,
+the magnetic loading, and the synchronous speed.
+
+\subsection{Magnetic and Electric Loading}
+
+\paragraph{Specific magnetic loading $\bar B$.}
+The average air-gap flux density over one pole (one pole pitch on the
+bore circumference):
+\begin{equation}
+  \bar{B} = \frac{p\,\Phi_p}{\pi D L}
+  \qquad\unit{[T]}
+\end{equation}
+where $\Phi_p$ is the flux per pole, $D$ the bore diameter and $L$ the
+axial length. Typical values: $0.6$--$0.9\unit{T}$ for industrial
+induction motors, $0.8$--$1.0\unit{T}$ for PM motors.
+
+\paragraph{Specific electric loading $\bar A$.}
+The RMS ampere-turns per unit length of air-gap circumference:
+\begin{equation}
+  \bar A = \frac{N_\text{turn,slot}\,I\,Q}{\pi D_i}
+  \qquad\unit{[A/m]}
+\end{equation}
+where $Q = N_s$ is the slot count, $N_\text{turn,slot}$ the turns per
+slot, $I$ the RMS phase current. Typical values: $20$--$40\unit{kA/m}$
+for industrial motors, up to $80$--$100\unit{kA/m}$ for forced-cooled
+machines. Higher $\bar A$ raises torque density but worsens
+$I^2R$ losses and demands better cooling.
+
+\subsection{Output Equation}
+
+The apparent power of an $m$-phase machine is
+$S = m\,E_m I_s$ where $E_m$ is the phase RMS EMF and $I_s$ the RMS
+current. Substituting the alternator formula
+$E_m = (2\pi/\sqrt{2})\,f\,N_s\,k_{w,1}\,\hat{B}\,A_\text{pole}/p$
+and grouping with the geometric variables:
+\begin{equation}
+  S_i
+    = \frac{\pi^2}{\sqrt{2}}\,n_\text{syn}\,k_{w,1}\,\bar A\,\hat B\,D^2 L
+  \label{eq:Si}
+\end{equation}
+The result is usually written
+\begin{equation}
+  \boxed{\,S_i = C\,D^2 L\,n_\text{syn}\,}
+  \qquad
+  C = \frac{\pi^2}{\sqrt{2}}\,k_{w,1}\,\bar A\,\hat B
+  \label{eq:C}
+\end{equation}
+where $C$ is the \emph{specific machine constant}, a single figure of
+merit that captures how well the machine uses its volume.
+$C$ depends only on the materials and the cooling capability; it lets
+machines of different sizes be compared at a glance.
+
+\paragraph{How to increase power.}
+From Eq.~\eqref{eq:Si}, the three independent levers are:
+\begin{enumerate}[noitemsep]
+  \item Increase the volume ($D^2 L$): build a physically larger machine.
+  \item Increase the loadings ($\bar A$, $\bar B$): better materials,
+        better cooling, higher current density.
+  \item Increase $n_\text{syn}$: spin it faster.
+\end{enumerate}
+The number of poles by itself does \emph{not} change $S_i$; for a
+fixed $n_\text{syn}$, more poles means higher $f$ but the same output
+power.
+
+\subsection{Worked Example -- Pyrh\"onen 6.1: 4 kW Induction Motor}
+
+Given $D=98\unit{mm}$, $L=82\unit{mm}$, $P = 4\unit{kW}$,
+$f=50\unit{Hz}$, $2p=2$, rated slip $s=0.01$.
+
+Synchronous speed $n_\text{syn} = f/p = 50\unit{Hz} = 3000\unit{rpm}$,
+mechanical $\omega_\text{mech} = 2\pi f(1-s) = 99\pi\unit{rad/s}$.
+
+Torque:
+\begin{equation}
+  T = \frac{P}{\omega_\text{mech}} = \frac{4000}{99\pi} \approx 12.86\unit{Nm}
+\end{equation}
+
+Air-gap (rotor surface) area:
+$S_r = \pi D L = \pi \cdot 0.098 \cdot 0.082 = 0.0252\unit{m^2}$.
+
+Tangential force and shear stress:
+\begin{equation}
+  F_\text{tan} = T/r = 12.86/0.049 = 262\unit{N},
+  \quad
+  \sigma = F_\text{tan}/S_r = 262/0.0252 \approx 10.4\unit{kPa}
+\end{equation}
+This is in the standard 5--35\unit{kPa} band for industrial
+non-PM motors.
+
+Specific machine constant (mechanical):
+\begin{equation}
+  C_\text{mech} = \frac{P}{D^2 L f_\text{sync}}
+                = \frac{4000}{0.098^2\cdot 0.082\cdot 50}
+                \approx 102\unit{kW\!\cdot\!s/m^3}
+\end{equation}
+
+\subsection{Aspect Ratio}
+
+The ratio $\chi = L/D$ is a free design parameter constrained mostly
+by mechanical and thermal considerations. For asynchronous machines a
+common rule of thumb is
+\begin{equation}
+  \chi \approx \frac{\pi}{2p}\,\sqrt[3]{p}
+\end{equation}
+with $0.5 \lesssim D/L \lesssim 2.5$ as a typical industrial band.
+Synchronous machines often have $\chi < 1$ (pancake) for direct-drive
+applications and $\chi > 1$ (slender) for high-speed applications.
+
+\subsection{Worked Example -- 30 kW Squirrel-Cage Induction Generator}
+
+A 30\unit{kW}, 690\unit{V}, 50\unit{Hz}, 4-pole, 3-phase squirrel-cage
+induction generator is to be sized.
+Choose $C_\text{mech} = 150\unit{kW/m^3}$ (a typical value for a
+totally-enclosed fan-cooled machine).
+
+Aspect ratio:
+\begin{equation}
+  \chi \approx \frac{\pi\sqrt[3]{p}}{2p}
+        = \frac{\pi\sqrt[3]{2}}{2\cdot 2}
+        = 0.989 \approx 1
+\end{equation}
+i.e.\ $L \approx D$, so $D^2 L \approx D^3$.
+
+Bore diameter:
+\begin{equation}
+  D = \sqrt[3]{\frac{P}{C_\text{mech}\,f_\text{sync}}}
+    = \sqrt[3]{\frac{30\,000}{150\,000\cdot 25}}
+    \approx 200\unit{mm}
+\end{equation}
+(taking $f_\text{sync} = f/p = 25$ rev/s for the 4-pole machine).
+With $L \approx D = 200\unit{mm}$.
+
+Mechanical speed $n_\text{mech} \approx 1474\unit{rpm}$
+(slip $\sim 1.7\%$), so the torque is
+$T = P/\omega = 30\,000/(2\pi\cdot 1474/60) \approx 194.4\unit{Nm}$.
+
+Tangential stress at the rotor surface:
+\begin{equation}
+  \sigma_\text{tan}
+    = \frac{T}{S_r\,r}
+    = \frac{T}{\pi D L \cdot D/2}
+    = \frac{194.4}{\pi(0.2)^3/2}
+    \approx 15.5\unit{kPa}
+\end{equation}
+again within the standard industrial band.
+
+Stator circumference $\pi D = 628\unit{mm}$.
+For $q=2$: $N_s = 2\cdot 4\cdot 3 = 24$ slots; assuming equal slot and
+tooth widths, the tooth thickness is
+$\tau_\text{teeth} = 628/(2\cdot 24) = 13\unit{mm}$.
+For $q=4$: $N_s=48$, $\tau_\text{teeth} = 6.5\unit{mm}$.
+For $q=3$: $N_s=36$, $\tau_\text{teeth} = 8\unit{mm}$ -- a reasonable
+compromise.
+Coil span: about 9 slots.
+
+% =====================================================================
+\section{Mechanical Constraints}
+\label{sec:mech}
+
+\subsection{Air-Gap Selection}
+
+The air gap $g$ is set by mechanical clearance, eccentricity tolerance,
+and the level of additional losses one is willing to accept from
+slot-harmonic field penetration. An empirical rule
+(Pyrh\"onen Eq.~6.7) for industrial induction motors:
+\begin{equation}
+  g \approx 1.6 \times 0.18 \times 0.006 \times P^{0.4}
+  \qquad\unit{[m,\,W]}
+\end{equation}
+For the 30\unit{kW} machine above this gives $g \approx 0.988\unit{mm}$.
+Heavy-duty service typically warrants a 60\% increase
+($g \approx 1.5\unit{mm}$ here). PM machines often use the smallest
+mechanically feasible gap to minimise the required magnet volume.
+
+\subsection{Tip Speed and Centrifugal Stress}
+
+The tangential (tip) speed of the rotor is $v = \omega r$. For a
+0.25\unit{m} radius rotor to reach Mach~1
+($v \approx 345\unit{m/s}$) the angular speed is
+$\omega = v/r \approx 1400\unit{rad/s}$, i.e.\ $n \approx 14\,000\unit{rpm}$ --
+not feasible for any reasonable rotor.
+
+The centrifugal radial stress in a smooth solid rotor of density
+$\rho$ at the surface is
+\begin{equation}
+  \sigma_\text{mech} = C'\,\rho\,\omega^2\,r^2,
+  \qquad
+  C' = \frac{3+\nu}{4}
+\end{equation}
+where $\nu$ is Poisson's ratio. For steel, $\nu \approx 0.29$, so
+$C' \approx 0.823$.
+
+\paragraph{Worked example -- Pyrh\"onen 6.3.}
+A smooth steel cylinder with a small bore, $\rho = 7860\unit{kg/m^3}$,
+yield strength $\sigma_y = 300\unit{MPa}$, $\nu = 0.29$, spinning at
+$n=15\,000\unit{rpm}$.
+\begin{equation}
+  r_\text{max} = \sqrt{\frac{\sigma_y}{C'\,\rho\,\omega^2}}
+              = \sqrt{\frac{300\cdot 10^6}{0.823\cdot 7860\cdot(2\pi\cdot 15000/60)^2}}
+              \approx 0.13\unit{m}
+\end{equation}
+For comparison, a 0.25\unit{m} radius at the same speed would
+\emph{exceed} the yield strength -- this is the fundamental reason
+that high-speed machines must be slender (and why the aspect ratio
+$\chi$ grows for high-speed designs).
+
+\subsection{Slot-Height Optimisation}
+
+Tall slots offer more area for copper, allowing higher electric
+loading $\bar A$. But there are tradeoffs:
+\begin{itemize}[noitemsep]
+  \item Cooling becomes harder (heat has to travel further out of the
+        deep slot).
+  \item Slot leakage flux grows.
+  \item If $D_\text{rotor}$ is held constant, the outer diameter
+        grows; if $D_\text{out}$ is held constant, the rotor shrinks
+        and the torque drops because $T \propto D^2 L$.
+\end{itemize}
+A standard optimisation argument shows that the optimum normalised
+slot height $d = h_\text{slot}/(R_\text{out}-R_\text{rotor})$ is about
+0.5: torque scales as $T \propto (1-d)d$, maximised at $d = 1/2$.
+A common practical range is $0.3 \le d \le 0.6$.
+
+% =====================================================================
+\section{Main Flux Paths}
+\label{sec:carter}
+
+\subsection{Carter's Coefficient}
+
+Stator slotting causes the air-gap flux density to dip above each slot
+opening, raising the effective reluctance of the gap. Carter's
+coefficient $k_c \ge 1$ replaces the slotted stator with a smooth
+stator of enlarged effective gap:
+\begin{equation}
+  g_\text{eff} = k_c\,g
+\end{equation}
+The simplified Pyrh\"onen form (Eq.~3.34) is
+\begin{equation}
+  k_c = \frac{\tau_u}{\tau_u - b_e},
+  \quad
+  b_e = \kappa\,b_1,
+  \quad
+  \kappa = \frac{b_1/g}{5 + b_1/g}
+  \label{eq:carter}
+\end{equation}
+with $\tau_u$ the slot pitch at the bore, $b_1$ the slot opening, and
+$g$ the physical gap. $\kappa\to 0$ for small $b_1/g$ (no slotting
+effect) and $\kappa\to 1$ for very wide open slots.
+
+\paragraph{Worked example -- Pyrh\"onen 3.1.}
+$g = 0.8\unit{mm}$, $b_1 = 3\unit{mm}$, $\tau_u = 10\unit{mm}$.
+\begin{align*}
+  \kappa &= \frac{b_1/g}{5 + b_1/g}
+          = \frac{3/0.8}{5 + 3/0.8}
+          = \frac{3.75}{8.75} = 0.429\\
+  b_e    &= 0.429 \cdot 3 = 1.29\unit{mm}\\
+  k_c    &= \frac{10}{10 - 1.29} = 1.148\\
+  g_\text{eff} &= 0.8\cdot 1.148 = 0.918\unit{mm}
+\end{align*}
+
+\paragraph{Armature reaction.}
+In addition to the magnet (or rotor) field, the stator current sheet
+creates a field of its own that adds to the no-load gap field. For a
+linear core the armature reaction merely shifts the operating point;
+for a non-linear core close to saturation the reaction effect can
+dominate, distorting the field shape further.
+
+\subsection{Effective Core Length}
+
+The axial extent of a real stator stack is broken up by cooling ducts
+between packs of laminations. Flux fringes from one pack to the next
+across each duct, so the effective magnetic length $L'$ is somewhat
+greater than the iron length and somewhat less than the total stack
+length.
+
+\paragraph{Worked example -- Pyrh\"onen 3.2.}
+25 stator sectors of 30\unit{mm} each separated by 24 cooling ducts of
+$b_v = 10\unit{mm}$ each. The total stack length is
+$L = 25\cdot 30 + 24\cdot 10 = 990\unit{mm}$ (the iron length alone is
+$750\unit{mm}$). With air gap $g = 3\unit{mm}$:
+\begin{equation}
+  \kappa_v = \frac{b_v/g}{5 + b_v/g} = \frac{10/3}{5 + 10/3} = 0.4,
+  \quad
+  b_{ve} = 0.4 \cdot 10 = 4\unit{mm}
+\end{equation}
+The effective core length is then approximately
+\begin{equation}
+  L' \approx L - n_v\,b_{ve} + 2g
+         = 990 - 24\cdot 4 + 2\cdot 3
+         = 900\unit{mm}
+\end{equation}
+(the $+2g$ term accounts for axial-end fringing).
+
+% =====================================================================
+\section{Magnetizing Inductance}
+\label{sec:Lm}
+
+The magnetizing inductance $L_m$ of an AC machine is the
+self-inductance of one phase due to the fundamental-component
+air-gap field it creates when carrying only its own current and no
+saturating component. It is the dominant element of the shunt branch
+in the per-phase equivalent circuit (Section~\ref{sec:eqckt}).
+
+\subsection{Flux per Pole}
+
+A sinusoidally distributed air-gap flux density of peak value
+$\hat B$ integrated over half a wavelength (one pole pitch $\tau_p$,
+on axial length $L'$) gives the peak flux per pole:
+\begin{equation}
+  \hat\Phi_\text{pole}
+    = \int_0^\pi \hat B \sin\theta \cdot \frac{\tau_p}{\pi} L'\,d\theta
+    = \frac{2}{\pi}\,\hat B\,\tau_p\,L'
+  \label{eq:phi_pole}
+\end{equation}
+The corresponding stator flux linkage is
+$\lambda = k_{w,1}\,N_s\,\hat\Phi_\text{pole}$.
+
+\subsection{MMF of a Polyphase Winding}
+
+For a balanced $m$-phase winding with $N_s$ turns per phase, the
+fundamental space MMF amplitude is
+\begin{equation}
+  \widehat{\mathrm{MMF}}_1
+    = \frac{4}{\pi}\,\frac{k_{w,1}\,N_s}{2p}\,\sqrt{2}\,I_{s,\text{rms}}
+  \label{eq:mmf1}
+\end{equation}
+The factor $\tfrac{4}{\pi}$ is the Fourier amplitude of a square-wave
+ampere-turn distribution; division by $2p$ converts total turns to
+turns per pole; the $\sqrt{2}$ converts RMS to peak.
+
+\subsection{$L_m$ Derivation}
+
+Setting the MMF equal to $\hat H\,g_\text{eff} =
+\hat B\,g_\text{eff}/\mu_0$ and solving for $\hat B$:
+\begin{equation}
+  \hat B
+    = \frac{\mu_0}{g_\text{eff}}\cdot
+      \frac{4}{\pi}\,\frac{k_{w,1}N_s}{2p}\,\sqrt{2}\,I_{s,\text{rms}}
+\end{equation}
+The flux linkage per phase becomes
+\begin{equation}
+  \lambda = \frac{2}{\pi}\,\frac{\mu_0}{g_\text{eff}}\,
+            \frac{4}{\pi}\,\frac{(k_{w,1}N_s)^2}{2p}\,
+            \tau_p\,L'\,\sqrt{2}\,I_{s,\text{rms}}
+\end{equation}
+Dividing by $\sqrt{2}\,I_{s,\text{rms}}$ gives the per-phase
+magnetizing inductance:
+\begin{equation}
+  L_m^{(\text{ph})}
+    = \frac{2\mu_0 D}{p^2\,\pi\,g_\text{eff}}\,L'\,(k_{w,1}N_s)^2
+  \label{eq:Lm_phase}
+\end{equation}
+where $\tau_p = \pi D/(2p)$ has been used. For three-phase analysis
+one usually quotes the \emph{cyclic} magnetizing inductance
+\begin{equation}
+  L_m = \frac{3}{2}\,L_m^{(\text{ph})}
+  \label{eq:Lm_cyclic}
+\end{equation}
+which is the inductance seen in the equivalent dq circuit.
+
+\paragraph{Induction motor implications.}
+$L_m \propto 1/g_\text{eff}$. A larger effective gap reduces $L_m$,
+increases the magnetising current $I_m$, lowers the power factor, and
+ultimately reduces efficiency. This is why induction motors are
+designed with the smallest mechanically feasible gap (typically a
+fraction of a millimetre for sub-kW motors, a few millimetres at
+multi-MW).
+
+% =====================================================================
+\section{Leakage Flux}
+\label{sec:leakage}
+
+Flux that links \emph{some but not all} of the winding turns is called
+leakage flux. It does not contribute to torque, but it does store
+energy and shows up in the equivalent circuit as the leakage
+reactance.
+
+\subsection{Slot Leakage}
+
+Flux closing around a single tooth slot without linking the rotor
+winding constitutes slot leakage. Applying Amp\`ere's law on a closed
+contour inside the slot,
+\begin{equation}
+  \oint \vec H\cdot d\vec\ell = NI,
+\end{equation}
+the contour can be split into a vertical $H_2$ portion (close to the
+slot bottom, with most of the enclosed turns) and a horizontal $H_1$
+portion (across the slot mouth, with few turns enclosed).
+Since $H_2 \gg H_1$ but $\ell_2 \ll \ell_1$, the dominant contribution
+is the slot-bottom path; this is the source of the large slot-leakage
+inductance.
+
+\subsection{End-Winding Leakage}
+
+End-windings carry the full phase current but do not contribute to the
+useful air-gap field. The associated leakage inductance is roughly
+proportional to the end-winding length and is one of the reasons why
+fractional-slot tooth-coil windings (with very short end turns) achieve
+high torque density.
+
+\subsection{Magnet-to-Magnet and Tooth-Tip Leakage}
+
+In PM machines, a fraction of the magnet flux closes from one magnet
+to its neighbour through the air at the magnet ends, and through the
+tooth tips back to the stator slots. These leakage paths can be
+modelled with a reluctance network and are responsible for the
+reduction of the useful air-gap fundamental below the value computed
+from a 1D MEC.
+
+\subsection{Cogging Torque}
+
+A static interaction between the magnets and the stator slot openings
+produces a position-dependent reluctance, hence a position-dependent
+torque even at zero stator current. This \emph{cogging torque} is a
+torque ripple, not useful for propulsion. Fractional-slot windings
+attenuate it; further reduction comes from skewing the stator or the
+magnets by one slot pitch.
+
+% =====================================================================
+\section{Thermal Modelling}
+\label{sec:thermal}
+
+\subsection{Electrical--Thermal Analogy}
+
+Heat flow through a solid obeys the same diffusion equation as
+electric current in a resistor:
+\begin{equation}
+  q = \frac{\Delta T}{R_\text{th}}
+  \qquad\Longleftrightarrow\qquad
+  I = \frac{\Delta V}{R}
+\end{equation}
+The analogy is summarised in Table~\ref{tab:thermalanalogy}.
+
+\begin{table}[H]
+  \centering
+  \caption{Electrical--thermal analogy.}
+  \label{tab:thermalanalogy}
+  \begin{tabular}{ll}
+    \toprule
+    Electrical & Thermal \\
+    \midrule
+    Voltage $V$\unit{[V]}              & Temperature $T$\unit{[K]} \\
+    Current $I$\unit{[A]}              & Heat flow $q$\unit{[W]} \\
+    Resistance $R$\unit{[\Omega]}      & Thermal resistance $R_\text{th}$\unit{[K/W]} \\
+    Capacitance $C$\unit{[F]}          & Heat capacity $m c_p$\unit{[J/K]} \\
+    Conductivity $\sigma$               & Thermal conductivity $k$\unit{[W/(m\!\cdot\!K)]} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+A lumped thermal network of resistors and capacitors -- one node per
+component, one resistor per heat-flow path, one capacitor per thermal
+mass -- can predict steady-state and transient temperature rise
+without solving any PDE.
+
+\subsection{Conduction}
+
+For a slab of thickness $\ell$, area $A$ and conductivity $k$:
+\begin{equation}
+  R_\text{th,cond} = \frac{\ell}{k\,A}
+\end{equation}
+A copper slot, for example, conducts heat radially outward through the
+slot insulation (low $k$), the stator tooth iron (medium $k$), and
+into the frame.
+
+\subsection{Convection}
+
+For a surface of area $A$ exposed to a coolant with film coefficient
+$h$:
+\begin{equation}
+  R_\text{th,conv} = \frac{1}{h\,A}
+\end{equation}
+Natural convection $h\sim 5$--$25\unit{W/(m^2K)}$;
+forced air $h\sim 25$--$250\unit{W/(m^2K)}$;
+water cooling $h\sim 10^3$--$10^4\unit{W/(m^2K)}$.
+
+\paragraph{Fan-load scaling.}
+For a fan, the torque scales as $T\propto\omega^2$ and the power as
+$P=T\omega\propto\omega^3$. Doubling the airflow speed therefore
+requires eight times the shaft power -- which is why uprating the
+cooling of an existing machine by simply spinning the fan faster has
+diminishing returns.
+
+\subsection{Worked Example -- Thermal Uprate}
+
+A motor rated $P_\text{out} = 10\unit{kW}$, $\eta = 0.9$,
+$T_\text{amb} = 40\unit{\degree C}$, $T_\text{motor} = 80\unit{\degree C}$
+at rating. So $P_\text{loss} = P_\text{out}/\eta - P_\text{out} =
+1\unit{kW}$ and $\Delta T = 40\unit{K}$, giving the steady-state
+thermal resistance $R_\text{th} = 40\unit{K/kW} = 0.04\unit{K/W}$.
+
+\emph{Uprate by 50\%.} If the same motor must deliver $15\unit{kW}$,
+the $I^2R$ losses scale as $I^2 \propto P^2$, so
+$P_\text{loss}^{\text{new}} = 1\,\text{kW}\cdot(1.5)^2 = 2.25\unit{kW}$
+and the temperature rise becomes $\Delta T = R_\text{th}\cdot
+P_\text{loss}^{\text{new}} = 40 \cdot 2.25 = 90\unit{K}$ above
+ambient, i.e.\ $T_\text{motor} \approx 130\unit{\degree C}$.
+A more careful calculation that also lets the winding resistance grow
+with temperature (a $\sim 25$\% increase at $130\unit{\degree C}$
+relative to $80\unit{\degree C}$) gives
+$\Delta T \approx 112.5\unit{K}$ and $T_\text{motor}\approx 152\unit{\degree C}$ --
+likely beyond Class~F insulation limits, so the uprate is not
+sustainable without improved cooling.
+
+\subsection{Thermal Network for a Machine}
+
+A practical thermal model groups losses by region (copper, iron,
+end winding, magnet) and connects them through the local conduction
+and convection resistances. Heat then flows from copper $\to$ slot
+insulation $\to$ tooth iron $\to$ back-iron $\to$ frame $\to$ ambient.
+Air ducts add parallel convection paths from the iron to the duct air,
+in series with the duct-to-ambient resistance. The end-winding region
+has its own convection path to the internal air volume.
+
+% =====================================================================
+\section{Permanent Magnet Machines}
+\label{sec:pm}
+
+\subsection{Hard vs.\ Soft Ferromagnetic Materials}
+
+The B--H loop of a \emph{soft} ferromagnetic material (silicon steel,
+nickel-iron alloys) has small enclosed area and small coercive force
+$H_c$: it follows the applied field easily and reverses with little
+hysteresis loss. Soft materials are used for the stator and rotor
+cores of all electrical machines.
+
+A \emph{hard} ferromagnetic material (ferrite, samarium-cobalt,
+neodymium-iron-boron) has very large $H_c$ and large remanent flux
+density $B_r$. Once magnetised it retains its magnetisation against
+substantial demagnetising fields. The figure of merit is the
+\emph{maximum energy product} $|BH|_\text{max}$ -- the area of the
+largest rectangle that fits in the second-quadrant
+$B$--$H$ characteristic.
+Typical values:
+\begin{itemize}[noitemsep]
+  \item Ferrite: $B_r \approx 0.4\unit{T}$, $H_c\approx 250\unit{kA/m}$,
+        $|BH|_\text{max}\approx 30\unit{kJ/m^3}$.
+  \item NdFeB: $B_r\approx 1.2$--$1.4\unit{T}$,
+        $H_c\approx 800$--$1200\unit{kA/m}$,
+        $|BH|_\text{max}\approx 250$--$430\unit{kJ/m^3}$.
+\end{itemize}
+
+\subsection{Magnet Equivalent Circuit}
+
+In the linear (recoil) region of the second quadrant, the magnet
+behaves like an MMF source $H_c\,l_m$ in series with an internal
+reluctance $\mathcal{R}_m = l_m/(\mu_0\mu_r A_m)$, where
+$\mu_r\approx 1.05$ for NdFeB.
+Equivalently, on the $B$ axis, the source is the remanent flux
+$\Phi_r = B_r A_m$.
+The whole magnetic circuit becomes a flux source driving an external
+reluctance (the air gap, the iron, and any leakage paths) in series
+with $\mathcal{R}_m$:
+\begin{equation}
+  \Phi_g = \frac{B_r\,A_m}{\,1 + \mathcal{R}_g/\mathcal{R}_m\,}
+\end{equation}
+In the idealised 1D case with $A_m = A_g = A$ and infinite iron
+permeability, this reduces (cf.\ Section~5 of the HW2 report) to
+\begin{equation}
+  B_g = \frac{B_r\,l_m}{l_m + \mu_r\,g}
+\end{equation}
+With Carter's correction, $g$ is replaced by $k_c g$.
+
+\subsection{Operating Point and Sizing Intuition}
+
+The operating point of the magnet is the intersection of its
+demagnetisation line with the load line $-B/(\mu_0 H) =
+\mathcal{R}_m/\mathcal{R}_g$. Moving the operating point closer to
+$|BH|_\text{max}$ -- a load line through the ``knee'' of the
+recoil curve -- maximises the energy delivered per unit volume of
+magnet material.
+
+\paragraph{Doubling the magnet thickness does not double $B_g$.}
+The MMF source doubles but the magnet reluctance also doubles, while
+the air-gap reluctance is unchanged. The increase in $B_g$ is
+therefore sub-linear: e.g.\ for $l_m = 4\unit{mm}$, $g = 4\unit{mm}$
+the gap field might be $B_g = 0.6\unit{T}$; doubling the magnet to
+$l_m = 8\unit{mm}$ raises $B_g$ to roughly $0.8\unit{T}$, not
+$1.2\unit{T}$.
+Conversely, a magnet thinner than $\mu_r g$ is essentially short-circuited
+by its own reluctance and delivers a small fraction of $B_r$.
+
+\paragraph{Maximum energy transfer.}
+The classical maximum-power-transfer theorem applies: the energy
+density delivered to the external circuit is maximised when the
+external (load) reluctance equals the internal (magnet) reluctance.
+For a fixed magnet, this fixes the optimum effective air gap; for a
+fixed air gap, it fixes the optimum magnet thickness:
+\begin{equation}
+  l_m^\text{opt} \;\approx\; \mu_r\,g_\text{eff}.
+\end{equation}
+In practice, the working point is pushed slightly toward the
+high-$B$ side of this optimum because demagnetisation safety margin
+is more valuable than the last few percent of efficiency.
+
+\subsection{Demagnetisation Safety}
+
+The temperature dependence of $B_r$ (typically $-0.1\%/$\degree C for
+NdFeB) and of $H_c$ (typically $-0.5\%/$\degree C) shifts the
+demagnetisation line toward the origin as the magnet heats up.
+A short-circuit fault, an inverter shoot-through, or a starting
+current transient can drive the operating point below the
+\emph{knee} of the recoil line; below the knee, recoil is irreversible
+and the magnet loses some of its $B_r$ permanently. Conservative PM
+machine design therefore checks the worst-case operating point
+(highest temperature, largest stator current, demagnetising stator
+MMF) against a margin to the knee.
+
+% =====================================================================
+\appendix
+\section{Summary of Key Formulas}
+
+\begin{itemize}[noitemsep]
+  \item Slots per pole per phase: $q = N_s/(2pm)$.
+  \item Distribution factor:
+        $k_{d,n} = \sin(nq\alpha_e/2)/[q\sin(n\alpha_e/2)]$.
+  \item Pitch factor: $k_{p,n} = \sin(n\lambda/2)$, with $\lambda$ the
+        coil span in electrical degrees.
+  \item Winding factor: $k_{w,n} = k_{d,n}\,k_{p,n}$.
+  \item Flux per pole: $\hat\Phi_\text{pole} = (2/\pi)\hat B\,\tau_p L'$.
+  \item Alternator EMF (per harmonic): $V_\text{rms} = 4.44\,f\,N_s\,k_{w,n}\,\hat B\,A_\text{pole}$.
+  \item Output equation: $S_i = (\pi^2/\sqrt{2})\,k_{w,1}\,\bar A\,\hat B\,D^2 L\,n_\text{syn}
+                              = C\,D^2 L\,n_\text{syn}$.
+  \item Carter's coefficient: $k_c = \tau_u/(\tau_u-b_e)$,
+        $b_e = \kappa b_1$, $\kappa = (b_1/g)/(5+b_1/g)$.
+  \item Effective core length: $L' \approx L - n_v b_{ve} + 2g$.
+  \item Magnetising inductance per phase:
+        $L_m^{(\text{ph})} = (2\mu_0 D/(p^2\pi g_\text{eff}))\,L'\,(k_{w,1}N_s)^2$.
+  \item Shear stress / Maxwell stress: $\sigma = B^2/(2\mu_0)$.
+  \item Air-gap flux density of a surface-PM machine:
+        $B_g = B_r l_m/(l_m + \mu_r k_c g)$.
+\end{itemize}
+
+\section{Symbols and Units}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    Symbol & Meaning & Typical unit \\
+    \midrule
+    $D$         & stator bore diameter         & m \\
+    $L$         & axial (stack) length         & m \\
+    $L'$        & effective magnetic length    & m \\
+    $g$         & physical air-gap length      & mm \\
+    $g_\text{eff}$ & effective air-gap (with $k_c$) & mm \\
+    $\tau_s$    & slot pitch at the bore       & mm \\
+    $\tau_p$    & pole pitch at the bore       & mm \\
+    $b_1, w_s$  & slot opening width           & mm \\
+    $w_{tb}$    & tooth body width             & mm \\
+    $h_\text{slot}$ & slot height               & mm \\
+    $N_s$       & total slot count             & --- \\
+    $2p$        & pole count                   & --- \\
+    $m$         & phase count                  & --- \\
+    $q$         & slots per pole per phase     & --- \\
+    $\alpha_e$  & slot pitch, electrical       & deg \\
+    $k_d$, $k_p$, $k_w$ & winding factors       & --- \\
+    $\bar B$    & specific magnetic loading    & T \\
+    $\bar A$    & specific electric loading    & A/m \\
+    $C$         & specific machine constant    & W$\cdot$s/m\textsuperscript{3} \\
+    $B_r$       & magnet remanence             & T \\
+    $H_c$       & magnet coercivity            & A/m \\
+    $\mu_r$     & magnet relative permeability & --- (usually $\sim 1.05$) \\
+    $l_m$       & magnet radial thickness      & mm \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\end{document}
